@@ -1,0 +1,196 @@
+---
+title: "stat"
+format: html
+editor: source
+---
+
+## data.frame
+
+Rに標準で含まれる`cars`データセットを読み込み、最初と最後の数行を確認してどのような観測が含まれているかを把握します。
+```{r}
+head(cars)
+tail(cars)
+```
+
+データフレームがどのくらいの規模かを知るために、行数と列数を取得します。
+```{r}
+nrow(cars)
+ncol(cars)
+```
+`nrow(cars)` は観測数（サイズ・行数）を返し、`ncol(cars)` は変数数（次元・列数）を返します。
+
+
+変数の型や欠損値の有無など、データの構造を一覧で確認します。
+```{r}
+str(cars)
+```
+`$`記法を使って、特定の変数（ここでは`spped`と`dist`）のデータ型を個別に確認することもできます。
+
+各列の要約統計量（平均・中央値・四分位数など）を一度に確認します。
+```{r}
+summary(cars)
+```
+
+## 基本統計量
+
+速度と制動距離それぞれの平均値を求め、データのおおよその中心を把握します。
+```{r}
+mean(cars$speed)
+mean(cars$dist)
+```
+
+データを$\{x_i\}_i^n$としたとき、平均値 $\bar{x}$ は
+$$
+\bar{x} = \frac{1}{n}\sum_{i=1}^nx_i
+$$
+で定義される。
+この定義をRで確かめることができる。
+```{r}
+sum(cars$speed) / nrow(cars)
+```
+
+
+分散を計算して、各変数がどの程度ばらついているかを確認します。
+```{r}
+var(cars$speed)
+var(cars$dist)
+```
+
+データを$\{x_i\}_i^n$としたとき、分散 $s_x^2$ は
+$$　s_x^2 = \frac{1}{n-1}\sum_{i=1}^n(x_i-\bar{x})^2
+$$
+で定義される。分散公式より、以下が成り立つ。
+$$
+\frac{n-1}{n}s_x^2=\frac{1}{n}\sum_{i=1}^nx_i^2 - \bar{x}^2
+$$
+
+この定義と性質をRで確かめることができる。
+```{r}
+sum((cars$speed-mean(cars$speed))^2)/(nrow(cars)-1)
+sum(cars$speed^2) / nrow(cars) - mean(cars$speed)^2
+(nrow(cars)-1)/nrow(cars)*var(cars$speed)
+```
+
+標準偏差 $s_x$ を求めることで、平均からどれくらい離れている観測が多いかを直感的に把握します。
+```{r}
+sd(cars$speed)
+sd(cars$dist)
+```
+
+標準偏差は分散の平方根を返すので、以下と同じ結果になります。
+```{r}
+sqrt(var(cars$speed))
+```
+
+速度と制動距離の共分散を計算し、両者の関係が正か負かを調べます。
+```{r}
+cov(cars$speed, cars$dist)
+```
+
+データを$\{x_i,y_i\}_i^n$としたとき、共分散 $s_{xy}$ は
+$$　s_{xy} = \frac{1}{n-1}\sum_{i=1}^n(x_i-\bar{x})(y_i-\bar{y})
+$$
+で定義される。共分散公式より、以下が成り立つ。
+$$
+\frac{n-1}{n}s_{xy}=\frac{1}{n}\sum_{i=1}^nx_i y_i^2 - \bar{x}\bar{y}
+$$
+
+この定義と性質をRで確かめることができる。
+```{r}
+sum((cars$speed-mean(cars$speed))*(cars$dist-mean(cars$dist)))/(nrow(cars)-1)
+mean(cars$speed*cars$dist)-mean(cars$speed)*mean(cars$dist)
+cov(cars$speed,cars$dist)*(nrow(cars)-1)/nrow(cars)
+```
+
+相関係数を計算して、速度と制動距離の関係の強さを-1から1の範囲で確認します。
+```{r}
+cor(cars$speed, cars$dist)
+```
+
+相関係数は$r_{xy}$ は以下で定義される。
+$$
+r_{xy} = \frac{s_{xy}}{s_x s_y}
+$$
+また標準化された変数の共分散とも解釈できる。
+$$
+r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{y_i-\bar{y}}{s_y}\right)
+$$
+この定義と性質をRで確かめることができる。
+
+```{r}
+cov(cars$speed,cars$dist)/(sd(cars$speed)*sd(cars$dist))
+zx<- (cars$speed-mean(cars$speed))/sd(cars$speed)
+zy<- (cars$dist-mean(cars$dist))/sd(cars$dist)
+cov(zx,zy)
+```
+
+
+## 作図
+
+速度のヒストグラムを描き、データの分布をざっくり確認します。
+```{r}
+hist(cars$speed)
+```
+
+ビンの数や色、タイトルなどを指定してヒストグラムの見た目を調整します。
+```{r}
+hist(cars$speed, breaks = 10, col = "lightblue", main = "Histogram of Speed", xlab = "Speed")
+```
+
+速度を横軸、制動距離を縦軸にして散布図を描き、両者の関係を視覚化します。
+```{r}
+plot(cars$speed, cars$dist)
+```
+
+Formula（`dist ~ speed`）を使って同じ散布図を描く別の書き方です。
+```{r}
+plot(dist~speed, data = cars)
+```
+
+タイトルや色、点の形などを指定して散布図をさらに見やすく調整します。
+```{r}
+plot(dist~speed, data = cars, main = "Distance vs Speed", xlab = "Speed", ylab = "Distance", pch = 19, col = "blue")
+```
+
+## 回帰分析
+
+速度から制動距離を予測する**単回帰モデル**を作成し、その結果を要約します。単回帰分析は、1つの説明変数（原因）から1つの被説明変数（結果）を予測する統計手法です。
+
+```{r}
+# lm()関数を使い、carsデータセットのspeed変数からdist変数を予測する線形回帰モデルを作成
+model <- lm(dist ~ speed, data = cars)
+
+# summary()関数でモデルの要約統計量を表示
+summary(model)
+```
+
+1.  まず`lm()`関数で線形回帰モデルを作成します。`dist ~ speed`というFormula表記は、`cars`データセットの速度(`speed`)を説明変数として制動距離(`dist`)を被説変数とするモデルを定義するもので、その分析結果が`model`変数に格納されます。
+2.  次に`summary()`関数を使って、作成したモデルの詳細な統計情報を表示します。これには回帰係数、標準誤差、t値、p値、決定係数($R^2$)などが含まれ、モデルの性能や説明変数と目的変数の関係性を評価するために重要な情報が提供されます。
+
+データを$\{x_i,y_i\}_i^n$としたとき、単回帰モデルの傾き $\hat{\beta}_1$ は
+$\hat{\beta}_1 = s_{xy}/s_x^2$ である。
+このこととは以下のRで確かめることができる。
+```{r}
+cov(cars$speed, cars$dist) / var(cars$speed)
+```
+
+予測値 $\hat{y}_i=\hat{\beta}_0+\hat{\beta}_1x_i$ とし、
+残差$\hat{u}_i=y_i-\hat{y}_i$ としたとき、
+決定係数 $R^2$ は以下で定義される。
+$$
+R^2=1-\frac{\sum\hat{u}_i^2}{\sum(y_i-\bar{y})^2}
+$$
+
+Rでは、決定係数は`summary(model)$r.squared`で取得でき、残差は`residuals(model)`で取得できるので、以下のようにして求めることもできます。
+
+決定係数を2通りの方法で求め、モデルがどれくらいデータを説明できているかを確認します。
+```{r}
+summary(model)$r.squared
+1 - sum(residuals(model)^2) / sum((cars$dist - mean(cars$dist))^2)
+```
+
+`abline()`関数を使って、散布図に回帰直線を重ねて描画します。
+```{r}
+plot(dist ~ speed, data = cars, main = "Distance vs Speed with Regression Line", xlab = "Speed", ylab = "Distance", pch = 19, col = "blue")
+abline(model, col = "red")
+```
