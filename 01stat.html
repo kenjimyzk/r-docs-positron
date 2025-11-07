@@ -152,6 +152,7 @@ window.Quarto = {
 </div>
 </div>
 <p>それぞれの変数の意味は<code>help(cars)</code>で確認できます。</p>
+<p>出力では先頭に速度4〜11mile/h・制動距離2〜26ft程度の観測、末尾に最大25mile/h・120ft近い観測が現れ、速度が上がるにつれて制動距離も大きくなる傾向が生データからも伺えます。</p>
 <p>データフレームがどのくらいの規模かを知るために、行数と列数を取得します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -164,6 +165,7 @@ window.Quarto = {
 </div>
 </div>
 <p><code>nrow(cars)</code> は観測数（サイズ・行数）を返し、<code>ncol(cars)</code> は変数数（次元・列数）を返します。</p>
+<p>実際の結果は行数50、列数2で、<code>cars</code> は速度と制動距離のみで構成されたコンパクトなデータセットであることが確認できます。</p>
 <p>変数の型や欠損値の有無など、データの構造を一覧で確認します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -174,6 +176,7 @@ window.Quarto = {
 </div>
 </div>
 <p><code>$</code>記法を使って、特定の変数（ここでは<code>spped</code>と<code>dist</code>）のデータ型を個別に確認することもできます。</p>
+<p><code>str()</code> の出力では 50 行×2 列のデータフレームで、どちらの列も数値型かつ欠損が無いことが分かります。</p>
 <p>各列の要約統計量（平均・中央値・四分位数など）を一度に確認します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -187,6 +190,7 @@ window.Quarto = {
  Max.   :25.0   Max.   :120.00  </code></pre>
 </div>
 </div>
+<p><code>summary()</code> から、速度は4〜25mile/hの範囲にあり中央値15mile/h、制動距離は2〜120ftで中央値36ftと、どちらもやや右に裾が伸びる分布であることが読み取れます。</p>
 </section>
 <section id="基本統計量" class="level2">
 <h2 class="anchored" data-anchor-id="基本統計量">基本統計量</h2>
@@ -201,15 +205,17 @@ window.Quarto = {
 <pre><code>[1] 42.98</code></pre>
 </div>
 </div>
+<p>計算結果は速度の平均が約15.4mile/h、制動距離の平均が約43ftで、標準的な観測の規模感を示しています。</p>
 <p>データを<span class="math inline">\(\{x_i\}_i^n\)</span>としたとき、平均値 <span class="math inline">\(\bar{x}\)</span> は <span class="math display">\[
 \bar{x} = \frac{1}{n}\sum_{i=1}^nx_i
-\]</span> で定義される。 この定義をRで確かめることができる。</p>
+\]</span> で定義されます。 この定義をRで確かめることができます。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(cars<span class="sc">$</span>speed) <span class="sc">/</span> <span class="fu">nrow</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 15.4</code></pre>
 </div>
 </div>
+<p>この式でも 15.4 と表示され、<code>mean()</code> が理論式通りに動いていることを確認できます。</p>
 <p>分散を計算して、各変数がどの程度ばらついているかを確認します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(cars<span class="sc">$</span>speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -221,11 +227,12 @@ window.Quarto = {
 <pre><code>[1] 664.0608</code></pre>
 </div>
 </div>
+<p>結果は速度の分散が約27.96、制動距離の分散が約664で、距離の方が桁違いにばらつくことが分かります（単位の違いも影響しています）。</p>
 <p>データを<span class="math inline">\(\{x_i\}_i^n\)</span>としたとき、分散 <span class="math inline">\(s_x^2\)</span> は <span class="math display">\[　s_x^2 = \frac{1}{n-1}\sum_{i=1}^n(x_i-\bar{x})^2
-\]</span> で定義される。分散公式より、以下が成り立つ。 <span class="math display">\[
+\]</span> で定義されます。分散公式より、以下が成り立ちます。 <span class="math display">\[
 \frac{n-1}{n}s_x^2=\frac{1}{n}\sum_{i=1}^nx_i^2 - \bar{x}^2
 \]</span></p>
-<p>この定義と性質をRで確かめることができる。</p>
+<p>この定義と性質をRで確かめることができます。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>((cars<span class="sc">$</span>speed<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>speed))<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span>(<span class="fu">nrow</span>(cars)<span class="sc">-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -240,6 +247,7 @@ window.Quarto = {
 <pre><code>[1] 27.4</code></pre>
 </div>
 </div>
+<p>3つの値はいずれも 27.95918 となり、分散の定義や公式同士が一致することを数値で確認できました。</p>
 <p>標準偏差 <span class="math inline">\(s_x\)</span> を求めることで、平均からどれくらい離れている観測が多いかを直感的に把握します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(cars<span class="sc">$</span>speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -251,6 +259,7 @@ window.Quarto = {
 <pre><code>[1] 25.76938</code></pre>
 </div>
 </div>
+<p>速度の標準偏差は約5.29、制動距離は約25.77なので、速度は平均±5mile/h程度、距離は±26ft程度の幅で散らばっていると言えます。</p>
 <p>標準偏差は分散の平方根を返すので、以下と同じ結果になります。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">var</span>(cars<span class="sc">$</span>speed))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -258,6 +267,7 @@ window.Quarto = {
 <pre><code>[1] 5.287644</code></pre>
 </div>
 </div>
+<p>こちらも 5.287644 と表示され、<code>sd()</code> と完全に一致します。</p>
 <p>速度と制動距離の共分散を計算し、両者の関係が正か負かを調べます。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -265,11 +275,12 @@ window.Quarto = {
 <pre><code>[1] 109.9469</code></pre>
 </div>
 </div>
+<p>数値は 109.95 と正で、速度が高い観測ほど制動距離も長くなる傾向があることを示します。</p>
 <p>データを<span class="math inline">\(\{x_i,y_i\}_i^n\)</span>としたとき、共分散 <span class="math inline">\(s_{xy}\)</span> は <span class="math display">\[　s_{xy} = \frac{1}{n-1}\sum_{i=1}^n(x_i-\bar{x})(y_i-\bar{y})
-\]</span> で定義される。共分散公式より、以下が成り立つ。 <span class="math display">\[
+\]</span> で定義されます。共分散公式より、以下が成り立ちます。 <span class="math display">\[
 \frac{n-1}{n}s_{xy}=\frac{1}{n}\sum_{i=1}^nx_i y_i^2 - \bar{x}\bar{y}
 \]</span></p>
-<p>この定義と性質をRで確かめることができる。</p>
+<p>この定義と性質をRで確かめることができます。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>((cars<span class="sc">$</span>speed<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>speed))<span class="sc">*</span>(cars<span class="sc">$</span>dist<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>dist)))<span class="sc">/</span>(<span class="fu">nrow</span>(cars)<span class="sc">-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -284,6 +295,7 @@ window.Quarto = {
 <pre><code>[1] 107.748</code></pre>
 </div>
 </div>
+<p>いずれの計算でも 109.9469 が得られ、公式の違いによらず一貫して正の共分散だと確認できます。</p>
 <p>相関係数を計算して、速度と制動距離の関係の強さを-1から1の範囲で確認します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -291,11 +303,11 @@ window.Quarto = {
 <pre><code>[1] 0.8068949</code></pre>
 </div>
 </div>
-<p>相関係数は<span class="math inline">\(r_{xy}\)</span> は以下で定義される。 <span class="math display">\[
+<p>相関係数は<span class="math inline">\(r_{xy}\)</span> は以下で定義されます。 <span class="math display">\[
 r_{xy} = \frac{s_{xy}}{s_x s_y}
-\]</span> また標準化された変数の共分散とも解釈できる。 <span class="math display">\[
+\]</span> また標準化された変数の共分散とも解釈できます。 <span class="math display">\[
 r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{y_i-\bar{y}}{s_y}\right)
-\]</span> この定義と性質をRで確かめることができる。</p>
+\]</span> この定義と性質をRで確かめることができます。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars<span class="sc">$</span>speed,cars<span class="sc">$</span>dist)<span class="sc">/</span>(<span class="fu">sd</span>(cars<span class="sc">$</span>speed)<span class="sc">*</span><span class="fu">sd</span>(cars<span class="sc">$</span>dist))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -308,6 +320,7 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 <pre><code>[1] 0.8068949</code></pre>
 </div>
 </div>
+<p>相関係数はいずれの方法でも 0.807 前後となり、速度と制動距離が強めの正の直線関係にあることを数値で裏付けています。</p>
 </section>
 <section id="作図" class="level2">
 <h2 class="anchored" data-anchor-id="作図">作図</h2>
@@ -322,6 +335,7 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 </div>
 </div>
 </div>
+<p>ヒストグラムから、速度は12〜20mile/h付近に集中しつつ25mile/h付近まで裾が伸びるやや右裾の分布であることが視覚的に分かります。</p>
 <p>ビンの数や色、タイトルなどを指定してヒストグラムの見た目を調整します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(cars<span class="sc">$</span>speed, <span class="at">breaks =</span> <span class="dv">10</span>, <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">main =</span> <span class="st">"Histogram of Speed"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -333,6 +347,7 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 </div>
 </div>
 </div>
+<p>ビンを増やした図では中速域（14〜18mile/h）で柱が高く、低速域や高速域は観測が少ないことがより明瞭になります。</p>
 <p>速度を横軸、制動距離を縦軸にして散布図を描き、両者の関係を視覚化します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -344,6 +359,7 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 </div>
 </div>
 </div>
+<p>点は右上がりに並び、速度が増すほど制動距離も伸びる傾向を視覚的に確認できます。</p>
 <p>Formula（<code>dist ~ speed</code>）を使って同じ散布図を描く別の書き方です。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist<span class="sc">~</span>speed, <span class="at">data =</span> cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -355,6 +371,7 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 </div>
 </div>
 </div>
+<p>こちらも同様に右上がりの雲が得られ、書き方が違っても同じ情報を描けることが分かります。</p>
 <p>タイトルや色、点の形などを指定して散布図をさらに見やすく調整します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist<span class="sc">~</span>speed, <span class="at">data =</span> cars, <span class="at">main =</span> <span class="st">"Distance vs Speed"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>, <span class="at">ylab =</span> <span class="st">"Distance"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -366,6 +383,7 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 </div>
 </div>
 </div>
+<p>装飾付きの散布図では、点の重なりが視認しやすくなり、高速域で距離のばらつきが大きいことも把握しやすくなります。</p>
 </section>
 <section id="回帰分析" class="level2">
 <h2 class="anchored" data-anchor-id="回帰分析">回帰分析</h2>
@@ -396,20 +414,22 @@ F-statistic: 89.57 on 1 and 48 DF,  p-value: 1.49e-12</code></pre>
 </div>
 <p>それぞれの実行コードの説明は以下の通りです。</p>
 <ol type="1">
-<li>まず<code>lm()</code>関数で線形回帰モデルを作成します。<code>dist ~ speed</code>というFormula表記は、<code>cars</code>データセットの速度(<code>speed</code>)を説明変数として制動距離(<code>dist</code>)を被説変数とするモデルを定義するもので、その分析結果が<code>model</code>変数に格納されます。</li>
+<li>まず<code>lm()</code>関数で線形回帰モデルを作成します。<code>dist ~ speed</code>というFormula表記は、<code>cars</code>データセットの速度(<code>speed</code>)を説明変数として制動距離(<code>dist</code>)を被説明変数とするモデルを定義するもので、その分析結果が<code>model</code>変数に格納されます。</li>
 <li>次に<code>summary()</code>関数を使って、作成したモデルの詳細な統計情報を表示します。これには回帰係数、標準誤差、t値、p値、決定係数(<span class="math inline">\(R^2\)</span>)などが含まれ、モデルの性能や説明変数と目的変数の関係性を評価するために重要な情報が提供されます。</li>
 </ol>
-<p>データを<span class="math inline">\(\{x_i,y_i\}_i^n\)</span>としたとき、単回帰モデルの傾き <span class="math inline">\(\hat{\beta}_1\)</span> は <span class="math inline">\(\hat{\beta}_1 = s_{xy}/s_x^2\)</span> である。 このこととは以下のRで確かめることができる。</p>
+<p>具体的には、切片が -17.6（p=0.012）で速度0の想定時に負の距離が推定される点や、傾きが 3.93（p&lt;0.001）で速度が1mile/h増えると制動距離が約4ft伸びると推測される点、決定係数 <span class="math inline">\(R^2=0.65\)</span> でデータの約65%を説明できる点などが読み取れます。</p>
+<p>データを<span class="math inline">\(\{x_i,y_i\}_i^n\)</span>としたとき、単回帰モデルの傾き <span class="math inline">\(\hat{\beta}_1\)</span> は <span class="math inline">\(\hat{\beta}_1 = s_{xy}/s_x^2\)</span> です。 このことは以下のRコードで確かめることができます。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist) <span class="sc">/</span> <span class="fu">var</span>(cars<span class="sc">$</span>speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 3.932409</code></pre>
 </div>
 </div>
-<p>予測値 <span class="math inline">\(\hat{y}_i=\hat{\beta}_0+\hat{\beta}_1x_i\)</span> とし、 残差<span class="math inline">\(\hat{u}_i=y_i-\hat{y}_i\)</span> としたとき、 決定係数 <span class="math inline">\(R^2\)</span> は以下で定義される。 <span class="math display">\[
+<p>計算結果は 3.932409 で、<code>summary(model)</code> で得た傾きと完全に一致します。</p>
+<p>予測値 <span class="math inline">\(\hat{y}_i=\hat{\beta}_0+\hat{\beta}_1x_i\)</span> とし、 残差<span class="math inline">\(\hat{u}_i=y_i-\hat{y}_i\)</span> としたとき、 決定係数 <span class="math inline">\(R^2\)</span> は以下で定義されます。 <span class="math display">\[
 R^2=1-\frac{\sum\hat{u}_i^2}{\sum(y_i-\bar{y})^2}
 \]</span></p>
-<p>Rでは、決定係数は<code>summary(model)$r.squared</code>で取得でき、残差は<code>residuals(model)</code>で取得できるので、以下のようにして求めることもできます。</p>
+<p>Rでは、決定係数は<code>summary(model)$r.squared</code>で取得できますし、残差は<code>residuals(model)</code>で取得できますので、以下のようにして求めることもできます。</p>
 <p>決定係数を2通りの方法で求め、モデルがどれくらいデータを説明できているかを確認します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model)<span class="sc">$</span>r.squared</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -421,6 +441,7 @@ R^2=1-\frac{\sum\hat{u}_i^2}{\sum(y_i-\bar{y})^2}
 <pre><code>[1] 0.6510794</code></pre>
 </div>
 </div>
+<p>いずれの式でも 0.651 と算出され、速度だけで距離の変動の約65%を説明できるモデルであることが分かります。</p>
 <p><code>abline()</code>関数を使って、散布図に回帰直線を重ねて描画します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist <span class="sc">~</span> speed, <span class="at">data =</span> cars, <span class="at">main =</span> <span class="st">"Distance vs Speed with Regression Line"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>, <span class="at">ylab =</span> <span class="st">"Distance"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span>
@@ -433,6 +454,7 @@ R^2=1-\frac{\sum\hat{u}_i^2}{\sum(y_i-\bar{y})^2}
 </div>
 </div>
 </div>
+<p>青い点に赤い回帰直線を重ねると、直線がデータの中心を通り右上がりに伸びる様子が視覚的に把握でき、傾き 3.93 という推定値の意味が直感的に伝わります。</p>
 </section>
 
 </main>
