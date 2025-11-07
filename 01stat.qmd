@@ -1,9 +1,15 @@
 ---
 title: "R使い方入門：基本統計量・作図・回帰分析"
-format: pdf
-pdf-engine: lualatex
-documentclass: ltjsarticle
-classoption: lualatex,ja=standard
+format: 
+    html:
+      toc: true
+      toc-depth: 2
+      number-sections: true
+    docx: default 
+    pdf:
+     pdf-engine: lualatex
+     documentclass: ltjsarticle
+     classoption: lualatex,ja=standard
 editor: source
 ---
 
