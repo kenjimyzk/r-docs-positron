@@ -85,12 +85,16 @@ anova(model0, model3)
 F統計量は499.75、p値はほぼゼロとなります。これは、`exper`と`exper2`の係数が両方ともゼロであるという帰無仮説を強く棄却することを示します。したがって、経験年数とその二乗項をモデルに加えることは、モデルの当てはまりを統計的に有意に改善すると結論付けられます。手計算によるF値も`anova`の結果と一致し、5%水準のF臨界値2.99を大幅に上回ります。
 
 ```{r}
+# 残差二乗和の計算
 ssr1 <- deviance(model3)
 ssr0 <- deviance(model0)
-k <- model3$rank-model0$rank
-f0<-(ssr0-ssr1)/k # numerator
-dof <- model3$df.residual
-f1<-ssr1/dof # denominator
+# 分子（numerator） 
+k <- model3$rank-model0$rank #　説明変数の違い
+f0<-(ssr0-ssr1)/k 
+# 分母（denominator）
+dof <- model3$df.residual # 自由度（degree of freedom）
+f1<-ssr1/dof 
+# F統計量の計算
 fstat<-f0/f1
 fstat
 ```
