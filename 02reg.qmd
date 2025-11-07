@@ -11,11 +11,11 @@ df <- read.csv("6_1_income.csv")
 head(df)
 ```
 
-賃金データをCSVから取り込み、`head()` で主な列（`lincome`, `yeduc`, `exper`, `exper2` など）の値や型をざっと確認して以降の解析に備えます。
+`read.csv()`関数を使い、CSVファイル`6_1_income.csv`から賃金データを読み込みます。`head()`関数でデータフレームの最初の数行を表示し、`lincome`（対数賃金）、`yeduc`（教育年数）、`exper`（経験年数）などの主要な変数の内容を確認します。これにより、データが正しく読み込まれているかを確認し、後の分析の準備をします。
 
 ### 重回帰分析
 
-`lm()` で学歴・経験年数・経験二乗を同時に投入した基本モデルを推定し、`summary()` で係数推定値、決定係数、p値をまとめて把握します。
+`lm()`関数を用いて、対数賃金 `lincome` を目的変数とし、教育年数 `yeduc`、経験年数 `exper`、およびその二乗 `exper2` を説明変数とする重回帰モデル（ミンサー方程式）を推定します。`summary()`関数で推定結果を表示し、各変数の係数、標準誤差、t値、p値、そしてモデル全体の決定係数（R-squared）やF統計量などを確認します。
 ```{r}
 model1 <- lm(lincome ~ yeduc + exper + exper2, data = df)
 summary(model1)
@@ -23,7 +23,7 @@ summary(model1)
 
 ### 回帰解剖
 
-説明変数どうしの重なりを可視化するために、まず `yeduc` を他の説明変数で回帰し、その残差を使って `lincome` と結びつける「回帰解剖」を実行します。
+FWL (Frisch-Waugh-Lovell) 定理に基づき、「回帰解剖」を実行します。まず、説明変数である `yeduc` を他の説明変数（`exper` と `exper2`）に回帰させ、そのモデルの残差を求めます。次に、目的変数 `lincome` をこの残差に回帰させます。この結果（`model11`）の傾き係数が、元の重回帰モデル（`model1`）における `yeduc` の係数と一致することを確認し、多重共線性の影響を分離して解釈する一助とします。
 ```{r}
 model10<-lm(yeduc ~ exper+exper2, data = df)
 model11<-lm(lincome~residuals(model10), data = df)
@@ -32,7 +32,7 @@ summary(model11)
 
 ### 対数変換
 
-元の `income` を `log()` で対数変換したモデルを別途推定し、スケールを変えることで係数解釈（弾力性）や残差分布がどう変化するかを比較します。
+目的変数を `income` のまま（対数変換せず）モデルを推定するのではなく、`log(income)` のように対数変換した `lincome` を用いることで、モデルの解釈がどのように変わるかを確認します。この対数線形モデルでは、`yeduc` の係数は「教育年数が1年増えると賃金が何パーセント変化するか」という弾力性として解釈できます。`summary()`で結果を比較します。
 ```{r}
 model2 <- lm(log(income) ~ yeduc + exper + exper2, data = df)
 summary(model2)
@@ -40,7 +40,7 @@ summary(model2)
 
 ### 二乗項
 
-`I(exper^2)` を明示的に加えて経験年数の曲線的効果を推定し、事前に作っておいた `exper2` を使うケースとで係数や適合度が一致するかを確認します。
+`lm()` の式の中で `I(exper^2)` を使うことで、データフレーム内に二乗項の変数を事前に作成しなくても、経験年数 `exper` の二乗項をモデルに投入できます。これにより、経験年数が賃金に与える非線形な（曲線的な）効果を捉えます。この `model3` の結果が、事前に `exper2` を作成して投入した `model1` と完全に一致することを確認します。
 ```{r}
 model3 <- lm(lincome~ yeduc + exper + I(exper^2), data = df)
 summary(model3)
@@ -48,7 +48,7 @@ summary(model3)
 
 ### F検定
 
-制約付きモデル (`model0`) と拡張モデル (`model1` / `model3`) のSSRを比較し、`anova()` と手計算の双方でF統計量と臨界値を確認してモデル拡張の有意性を判断します。
+`exper` と `exper2` をモデルに加えることに統計的な意味があるかをF検定で評価します。`yeduc` のみを含む制約モデル `model0` と、`exper` と `exper2` を追加した非制約モデル `model1`（または`model3`）を `anova()` 関数で比較します。また、各モデルの残差平方和（SSR）を `deviance()` で取り出し、手計算でF統計量を算出して `qf()` で求めた臨界値と比較することで、検定の仕組みを理解します。
 ```{r}
 model0 <- lm(lincome ~ yeduc, data = df)
 anova(model0, model1)
@@ -64,11 +64,8 @@ qf(0.95, k, dof)
 
 ## タミー変数
 
-性別を表すダミー変数（female）を導入し、ダミー変数やダミーとの交差項が収入に与える影響を調べます。
-
 ### 定数項のみ
-
-女性ダミーを含む新しいデータセットを読み込み、まずは `yeduc` と `female` のみを含むベースライン回帰を推定して、ダミー変数の係数解釈を確認します。
+`7_1_income.csv` から性別ダミー変数 `female` を含む新しいデータを読み込みます。`lm()` を用いて、`yeduc` と `female` を説明変数とするモデルを推定します。`summary()` の結果から、`female` の係数が、教育年数が同じである場合に男性（基準グループ）と比較して女性の対数賃金がどれだけ低いか（または高いか）の平均的な差を示していることを確認します。
 ```{r}
 df <- read.csv("7_1_income.csv")
 head(df)
@@ -78,7 +75,7 @@ summary(model1)
 
 ### 交差項の導入
 
-手作業で作成した交差項 `female_yeduc` を投入し、グループごとに学歴の傾きが違うかを直接推定します。
+教育年数 `yeduc` が賃金に与える影響（傾き）が、性別によって異なる可能性を検証するため、`female` ダミーと `yeduc` の交差項 `female_yeduc` をモデルに加えます。この交差項の係数は、女性の場合、男性に比べて教育の収益率（`yeduc`の係数）がどれだけ異なるかを示します。
 ```{r}
 model2 <- lm(lincome ~ yeduc + female + female_yeduc, data=df)
 summary(model2)
@@ -86,14 +83,14 @@ summary(model2)
 
 ### 交差項の別表記
 
-`female:yeduc` を用いた書き方では、同じ交差効果を `:` 演算子で指定しつつ、切片と傾きの水準差をそのまま確認できます。
+Rの formula 機能である `:` 演算子を用いて、`female` と `yeduc` の交差項をモデルに投入します。`female:yeduc` という記述は、`female_yeduc` のように事前に変数を手動で作成するのと同じ効果を持ちます。`model2` と `model3` の結果が一致することを確認します。
 ```{r}
 model3 <- lm(lincome ~ yeduc + female + female:yeduc, data=df)
 summary(model3)
 ```
 ### 交差項の別表記
 
-`yeduc * female` は主効果と交差効果を一括で展開する省略記法なので、同じ結果が得られるかを `model3` と比べてチェックします。
+`*` 演算子は、`yeduc` と `female` の両方の主効果と、それらの交差項 `yeduc:female` を一度にモデルに含めるための便利な省略記法です。`lm(lincome ~ yeduc * female, ...)` は `lm(lincome ~ yeduc + female + yeduc:female, ...)` と等価です。`model4` の結果が `model3` と同じになることを確認します。
 ```{r}
 model4 <- lm(lincome ~ yeduc * female, data=df)
 summary(model4)
@@ -101,7 +98,7 @@ summary(model4)
 
 ### F検定
 
-ダミーと交差項を含むモデル (`model4`) がベースライン (`model0`) より統計的に優れているかを `anova()` のF検定で確認します。
+性別ダミー `female` と交差項 `yeduc:female` を加えることで、モデルの当てはまりが統計的に有意に改善したかをF検定で評価します。`yeduc` のみを含む制約モデル `model0` と、`female` と交差項を追加した非制約モデル `model4` を `anova()` 関数で比較し、p値を確認します。
 ```{r}
 model0 <- lm(lincome ~ yeduc, data=df)
 anova(model0, model4)
@@ -109,7 +106,7 @@ anova(model0, model4)
 
 ### チャウ検定
 
-SSRを使ったチャウ検定統計量を手計算で求め、`model0` と `model4` の差異がサブサンプル（性別）間で係数の構造変化を示唆するかを評価します。
+チャウ検定（Chow Test）は、データセットをサブグループ（ここでは性別）に分割したときに、回帰係数がグループ間で安定しているか（構造変化がないか）を検定するものです。ここでは、`model0`（プールしたモデル）と `model4`（交差項を含むモデル、男女別のモデルと等価）の残差平方和（SSR）を用いて、手計算でF統計量を算出します。これは、前のチャンクで行った `anova()` の結果と一致し、性別によって賃金構造が異なることを示唆します。
 ```{r}
 ssr1 <- deviance(model4)
 ssr0 <- deviance(model0)
@@ -123,9 +120,7 @@ qf(0.95, k, dof)
 
 ## 頑健な標準誤差
 
-ホワイト修正やロバスト推定量を使って標準誤差がどの程度安定するかを比較します。以下では分散共分散行列の修正、`estimatr::waldtest`、`lm_robust` など複数のチャンクで手順を分けて示します。
-
-最初は `lmtest` / `sandwich` を用い、通常のOLS推定後に HC1 で分散共分散行列を補正してホワイト修正済みの係数表を得ます。
+不均一分散の問題に対処するため、頑健な標準誤差（Robust Standard Errors）を計算します。まず、`lm()` で通常のOLS回帰（`reg1`）を実行します。次に、`lmtest` パッケージの `coeftest` 関数と `sandwich` パッケージの `vcovHC` 関数を使い、不均一分散に対して頑健な（heteroskedasticity-consistent, HC1）標準誤差を計算し、係数の有意性を再評価します。
 ```{r}
 
 #データの読み込み
@@ -147,7 +142,9 @@ vcov <- vcovHC(reg1, type = "HC1")
 coeftest(reg1, vcov)
 ```
 
-続いて `estimatr::waldtest` に修正済み `vcov` を渡し、制約付きモデルと非制約モデルの差異が依然として有意かを頑健な標準誤差ベースで判定します。
+### 頑健なF検定（Wald検定）
+
+`estimatr` パッケージの `waldtest` 関数を用いて、頑健な標準誤差に基づいたF検定（Wald検定）を実行します。制約モデル `reg0` と非制約モデル `reg1` を比較する際に、`vcov` 引数に先ほど計算した頑健な分散共分散行列を指定することで、不均一分散を考慮した上で `exper` と `exper2` の係数が同時にゼロであるという帰無仮説を検定します。
 ```{r}
 library(estimatr)
 #ミンサー方程式をOLSで重回帰
@@ -156,7 +153,9 @@ reg0 <- lm(lincome ~ yeduc, data = income6)
 waldtest(reg0, reg1, vcov = vcov)
 ```
 
-`lm_robust()` の `se_type = "stata"` を使えば推定時点でハブホワイト型の標準誤差を得られるため、外部で `vcovHC` を計算せずに済む方法も押さえておきます。
+### lm_robustによる頑健な標準誤差の推定
+
+`estimatr` パッケージの `lm_robust()` 関数は、回帰モデルの推定と同時に頑健な標準誤差の計算を行います。`se_type = "stata"`（StataのデフォルトであるHC1に対応）を指定することで、`sandwich` パッケージを別途使わずに、一段階で不均一分散を考慮した推定結果を得ることができます。
 ```{r}
 library(estimatr)
 #ミンサー方程式をOLSで重回帰
@@ -165,14 +164,18 @@ reg_lm <- lm_robust(lincome ~ yeduc + exper + exper2, data = income6,se_type="st
 summary(reg_lm)
 ```
 
-同じ関数で `se_type = "classical"` を指定すると通常のOLS標準誤差に切り替えられるので、ロバスト推定との数値差を直接比較できます（ここでは `summary(reg_lm)` と見比べます）。
+### 通常の標準誤差との比較
+
+`lm_robust()` 関数で `se_type = "classical"` を指定すると、通常のOLS（古典的な仮定に基づく）の標準誤差が計算されます。これを前のチャンクで計算した頑健な標準誤差の結果（`reg_lm`）と比較することで、不均一分散が標準誤差の推定に与える影響の大きさを具体的に確認できます。
 ```{r}
 reg_0 <- lm_robust(lincome ~ yeduc + exper + exper2, data = income6,se_type="classical") 
 #回帰の結果の確認
 summary(reg_lm)
 ```
 
-最後にロバスト推定同士 (`reg_lm0` vs `reg_lm`) を `waldtest(..., test = "F")` で比較し、頑健な分散を前提に制約付きモデルが棄却されるかを確認します。
+### 頑健なモデル間のF検定
+
+`lm_robust()` で推定したモデル同士を比較する場合も `waldtest` を使用します。`se_type="stata"` を指定して推定した制約モデル `reg_lm0` と非制約モデル `reg_lm` を比較することで、頑健な標準誤差に基づいたF検定（この場合はF分布に従う検定統計量）を行い、モデルの改善が統計的に有意であるかを評価します。
 ```{r}
 reg_lm0 <- lm_robust(lincome ~ yeduc, data = income6, se_type="stata") 
 #回帰の結果の確認
