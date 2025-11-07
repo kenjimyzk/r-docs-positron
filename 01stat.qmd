@@ -1,6 +1,9 @@
 ---
-title: "stat"
-format: html
+title: "R使い方入門：基本統計量・作図・回帰分析"
+format: pdf
+pdf-engine: lualatex
+documentclass: ltjsarticle
+classoption: lualatex,ja=standard
 editor: source
 ---
 
