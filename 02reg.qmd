@@ -123,6 +123,7 @@ summary(model1)
 
 ```{r}
 model2 <- lm(lincome ~ yeduc + female + female_yeduc, data=df)
+summary(model2)
 ```
 
 `summary(model2)`の結果、交差項`female_yeduc`の係数は0.090と正で統計的に有意です。これは、教育の収益率が男女で異なることを示唆しています。
@@ -138,6 +139,7 @@ Rのformula機能である`:`演算子を用いて、`female`と`yeduc`の交差
 
 ```{r}
 model3 <- lm(lincome ~ yeduc + female + female:yeduc, data=df)
+summary(model3)
 ```
 
 `model3`の結果は`model2`と完全に一致します。これは、`:`演算子を使って交差項を指定する方法が、手動で交差項の変数を作成する方法と等価であることを確認できます。
@@ -148,6 +150,7 @@ model3 <- lm(lincome ~ yeduc + female + female:yeduc, data=df)
 
 ```{r}
 model4 <- lm(lincome ~ yeduc * female, data=df)
+summary(model4)
 ```
 
 `model4`の結果は`model2`および`model3`と同一です。これにより、`*`演算子が、複数の主効果とそれらの交差項を一度に指定するための有効なショートカットであることがわかります。
