@@ -273,14 +273,18 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </div>
 <p>F統計量は499.75、p値はほぼゼロとなります。これは、<code>exper</code>と<code>exper2</code>の係数が両方ともゼロであるという帰無仮説を強く棄却することを示します。したがって、経験年数とその二乗項をモデルに加えることは、モデルの当てはまりを統計的に有意に改善すると結論付けられます。手計算によるF値も<code>anova</code>の結果と一致し、5%水準のF臨界値2.99を大幅に上回ります。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ssr1 <span class="ot">&lt;-</span> <span class="fu">deviance</span>(model3)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>ssr0 <span class="ot">&lt;-</span> <span class="fu">deviance</span>(model0)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> model3<span class="sc">$</span>rank<span class="sc">-</span>model0<span class="sc">$</span>rank</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>f0<span class="ot">&lt;-</span>(ssr0<span class="sc">-</span>ssr1)<span class="sc">/</span>k <span class="co"># numerator</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>dof <span class="ot">&lt;-</span> model3<span class="sc">$</span>df.residual</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>f1<span class="ot">&lt;-</span>ssr1<span class="sc">/</span>dof <span class="co"># denominator</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>fstat<span class="ot">&lt;-</span>f0<span class="sc">/</span>f1</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>fstat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 残差二乗和の計算</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>ssr1 <span class="ot">&lt;-</span> <span class="fu">deviance</span>(model3)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>ssr0 <span class="ot">&lt;-</span> <span class="fu">deviance</span>(model0)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 分子（numerator） </span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> model3<span class="sc">$</span>rank<span class="sc">-</span>model0<span class="sc">$</span>rank <span class="co">#　説明変数の違い</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>f0<span class="ot">&lt;-</span>(ssr0<span class="sc">-</span>ssr1)<span class="sc">/</span>k </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 分母（denominator）</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>dof <span class="ot">&lt;-</span> model3<span class="sc">$</span>df.residual <span class="co"># 自由度（degree of freedom）</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>f1<span class="ot">&lt;-</span>ssr1<span class="sc">/</span>dof </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># F統計量の計算</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>fstat<span class="ot">&lt;-</span>f0<span class="sc">/</span>f1</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>fstat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 499.7542</code></pre>
 </div>
@@ -289,6 +293,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 </section>
 <section id="ダミー変数" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="ダミー変数"><span class="header-section-number">2</span> ダミー変数</h2>
+<p>0もしくは1をとる変数をダミー変数といいます。 Rでは、カテゴリ変数を自動的にダミー変数に変換して回帰分析を行うことができます。カテゴリ変数は因子（factor）として扱われ、<code>lm()</code>関数は自動的にダミー変数を生成します。2種類だけでなく3種類のカテゴリも扱えますが、ここでは省略します。 このセクションでは、性別ダミー変数を用いて男女間の賃金格差と教育の収益率の違いを分析します。</p>
 <section id="定数項のみ" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="定数項のみ"><span class="header-section-number">2.1</span> 定数項のみ</h3>
 <p><code>7_1_income.csv</code>から性別ダミー変数<code>female</code>を含む新しいデータを読み込み、<code>yeduc</code>と<code>female</code>を説明変数とするモデルを推定します。<code>female</code>の係数が、教育年数が同じ場合に男女間の賃金格差をどの程度示すかを確認します。</p>
