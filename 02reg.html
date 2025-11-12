@@ -329,7 +329,30 @@ F-statistic:   605 on 2 and 4283 DF,  p-value: &lt; 2.2e-16</code></pre>
 <h3 data-number="2.2" class="anchored" data-anchor-id="交差項の導入"><span class="header-section-number">2.2</span> 交差項の導入</h3>
 <p>教育の収益率（<code>yeduc</code>の係数）が性別によって異なる可能性を検証するため、<code>female</code>と<code>yeduc</code>の交差項<code>female_yeduc</code>をモデルに加えます。この交差項の係数は、女性であることによって教育の収益率がどれだけ変化するかを示します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> female <span class="sc">+</span> female_yeduc, <span class="at">data=</span>df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> female <span class="sc">+</span> female_yeduc, <span class="at">data=</span>df)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = lincome ~ yeduc + female + female_yeduc, data = df)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3.9239 -0.2630  0.1978  0.4854  2.2936 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   5.346896   0.120920  44.218  &lt; 2e-16 ***
+yeduc         0.024095   0.008533   2.824  0.00477 ** 
+female       -2.079202   0.192386 -10.807  &lt; 2e-16 ***
+female_yeduc  0.090229   0.013800   6.538 6.94e-11 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.8228 on 4282 degrees of freedom
+Multiple R-squared:  0.228, Adjusted R-squared:  0.2274 
+F-statistic: 421.5 on 3 and 4282 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
 </div>
 <p><code>summary(model2)</code>の結果、交差項<code>female_yeduc</code>の係数は0.090と正で統計的に有意です。これは、教育の収益率が男女で異なることを示唆しています。</p>
 <ul>
@@ -342,7 +365,30 @@ F-statistic:   605 on 2 and 4283 DF,  p-value: &lt; 2.2e-16</code></pre>
 <h3 data-number="2.3" class="anchored" data-anchor-id="交差項の別表記"><span class="header-section-number">2.3</span> 交差項の別表記</h3>
 <p>Rのformula機能である<code>:</code>演算子を用いて、<code>female</code>と<code>yeduc</code>の交差項をモデルに投入します。<code>female:yeduc</code>という記述は、事前に<code>female_yeduc</code>変数を手動で作成するのと同じ効果を持ちます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>model3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> female <span class="sc">+</span> female<span class="sc">:</span>yeduc, <span class="at">data=</span>df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>model3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> female <span class="sc">+</span> female<span class="sc">:</span>yeduc, <span class="at">data=</span>df)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = lincome ~ yeduc + female + female:yeduc, data = df)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3.9239 -0.2630  0.1978  0.4854  2.2936 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   5.346896   0.120920  44.218  &lt; 2e-16 ***
+yeduc         0.024095   0.008533   2.824  0.00477 ** 
+female       -2.079202   0.192386 -10.807  &lt; 2e-16 ***
+yeduc:female  0.090229   0.013800   6.538 6.94e-11 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.8228 on 4282 degrees of freedom
+Multiple R-squared:  0.228, Adjusted R-squared:  0.2274 
+F-statistic: 421.5 on 3 and 4282 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
 </div>
 <p><code>model3</code>の結果は<code>model2</code>と完全に一致します。これは、<code>:</code>演算子を使って交差項を指定する方法が、手動で交差項の変数を作成する方法と等価であることを確認できます。</p>
 </section>
@@ -350,7 +396,30 @@ F-statistic:   605 on 2 and 4283 DF,  p-value: &lt; 2.2e-16</code></pre>
 <h3 data-number="2.4" class="anchored" data-anchor-id="交差項の別表記-1"><span class="header-section-number">2.4</span> 交差項の別表記</h3>
 <p><code>*</code>演算子は、<code>yeduc</code>と<code>female</code>の主効果とそれらの交差項<code>yeduc:female</code>を一度にモデルに含めるための便利な省略記法です。<code>lm(lincome ~ yeduc * female, ...)</code>は<code>lm(lincome ~ yeduc + female + yeduc:female, ...)</code>と等価です。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>model4 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc <span class="sc">*</span> female, <span class="at">data=</span>df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>model4 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc <span class="sc">*</span> female, <span class="at">data=</span>df)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = lincome ~ yeduc * female, data = df)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3.9239 -0.2630  0.1978  0.4854  2.2936 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   5.346896   0.120920  44.218  &lt; 2e-16 ***
+yeduc         0.024095   0.008533   2.824  0.00477 ** 
+female       -2.079202   0.192386 -10.807  &lt; 2e-16 ***
+yeduc:female  0.090229   0.013800   6.538 6.94e-11 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.8228 on 4282 degrees of freedom
+Multiple R-squared:  0.228, Adjusted R-squared:  0.2274 
+F-statistic: 421.5 on 3 and 4282 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
 </div>
 <p><code>model4</code>の結果は<code>model2</code>および<code>model3</code>と同一です。これにより、<code>*</code>演算子が、複数の主効果とそれらの交差項を一度に指定するための有効なショートカットであることがわかります。</p>
 </section>
@@ -358,8 +427,8 @@ F-statistic:   605 on 2 and 4283 DF,  p-value: &lt; 2.2e-16</code></pre>
 <h3 data-number="2.5" class="anchored" data-anchor-id="f検定-1"><span class="header-section-number">2.5</span> F検定</h3>
 <p>性別ダミー<code>female</code>と交差項<code>yeduc:female</code>を加えることで、モデルの当てはまりが統計的に有意に改善したかをF検定で評価します。<code>yeduc</code>のみを含む制約モデル<code>model0</code>と、交差項を追加した非制約モデル<code>model4</code>を<code>anova()</code>関数で比較します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>model0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data=</span>df)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(model0, model4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>model0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data=</span>df)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(model0, model4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Analysis of Variance Table
 
@@ -378,19 +447,19 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <h3 data-number="2.6" class="anchored" data-anchor-id="チャウ検定"><span class="header-section-number">2.6</span> チャウ検定</h3>
 <p>チャウ検定は、サブグループ（ここでは性別）間で回帰係数が安定しているか（構造変化がないか）を検定します。<code>model0</code>（プールしたモデル）と<code>model4</code>（交差項を含むモデル）の残差平方和（SSR）を用いて、手計算でF統計量を算出します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#男性のみのデータを使って単回帰で推定</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> <span class="fu">subset</span>(df, female<span class="sc">==</span><span class="dv">0</span>))</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>SSR1 <span class="ot">&lt;-</span> <span class="fu">deviance</span>(reg1)</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co">#女性のみのデータを使って単回帰で推定</span></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>reg2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> <span class="fu">subset</span>(df, female<span class="sc">==</span><span class="dv">1</span>))</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>SSR2 <span class="ot">&lt;-</span> <span class="fu">deviance</span>(reg2)</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">#すべてのデータを使って単回帰で推定</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>reg3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> df)</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>SSR <span class="ot">&lt;-</span> <span class="fu">deviance</span>(reg3)</span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> reg3<span class="sc">$</span>rank</span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co">#チョウ検定統計量の計算</span></span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>Fstat <span class="ot">&lt;-</span> (SSR<span class="sc">-</span>(SSR1 <span class="sc">+</span> SSR2))<span class="sc">/</span>(SSR1 <span class="sc">+</span> SSR2) <span class="sc">*</span> (<span class="fu">nrow</span>(df) <span class="sc">-</span> <span class="dv">2</span><span class="sc">*</span>k)<span class="sc">/</span>k</span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>Fstat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#男性のみのデータを使って単回帰で推定</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> <span class="fu">subset</span>(df, female<span class="sc">==</span><span class="dv">0</span>))</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>SSR1 <span class="ot">&lt;-</span> <span class="fu">deviance</span>(reg1)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co">#女性のみのデータを使って単回帰で推定</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>reg2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> <span class="fu">subset</span>(df, female<span class="sc">==</span><span class="dv">1</span>))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>SSR2 <span class="ot">&lt;-</span> <span class="fu">deviance</span>(reg2)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co">#すべてのデータを使って単回帰で推定</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>reg3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> df)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>SSR <span class="ot">&lt;-</span> <span class="fu">deviance</span>(reg3)</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> reg3<span class="sc">$</span>rank</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="co">#チョウ検定統計量の計算</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>Fstat <span class="ot">&lt;-</span> (SSR<span class="sc">-</span>(SSR1 <span class="sc">+</span> SSR2))<span class="sc">/</span>(SSR1 <span class="sc">+</span> SSR2) <span class="sc">*</span> (<span class="fu">nrow</span>(df) <span class="sc">-</span> <span class="dv">2</span><span class="sc">*</span>k)<span class="sc">/</span>k</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>Fstat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 565.4484</code></pre>
 </div>
@@ -402,32 +471,32 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <h2 data-number="3" class="anchored" data-anchor-id="頑健な標準誤差"><span class="header-section-number">3</span> 頑健な標準誤差</h2>
 <p>不均一分散の問題に対処するため、頑健な標準誤差を計算します。<code>lmtest</code>と<code>sandwich</code>パッケージを使い、不均一分散に対して頑健な（HC1）標準誤差を計算し、係数の有意性を再評価します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">#データの読み込み</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>income6 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"6_1_income.csv"</span>)</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co">#ミンサー方程式をOLSで重回帰</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2, <span class="at">data =</span> income6) </span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co">#必要なパッケージのインストールと読み込み</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lmtest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">#データの読み込み</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>income6 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"6_1_income.csv"</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co">#ミンサー方程式をOLSで重回帰</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2, <span class="at">data =</span> income6) </span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co">#必要なパッケージのインストールと読み込み</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lmtest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code> 要求されたパッケージ zoo をロード中です </code></pre>
+<pre><code>Loading required package: zoo</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>
- 次のパッケージを付け加えます: 'zoo' </code></pre>
+Attaching package: 'zoo'</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code> 以下のオブジェクトは 'package:base' からマスクされています:
+<pre><code>The following objects are masked from 'package:base':
 
     as.Date, as.Date.numeric</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sandwich)</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co">#分散共分散行列を計算</span></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>vcov <span class="ot">&lt;-</span> <span class="fu">vcovHC</span>(reg1, <span class="at">type =</span> <span class="st">"HC1"</span>)</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co">#重回帰分析の結果とvcovから標準誤差をホワイト修正</span></span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(reg1, vcov)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sandwich)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="co">#分散共分散行列を計算</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>vcov <span class="ot">&lt;-</span> <span class="fu">vcovHC</span>(reg1, <span class="at">type =</span> <span class="st">"HC1"</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="co">#重回帰分析の結果とvcovから標準誤差をホワイト修正</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(reg1, vcov)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 t test of coefficients:
@@ -446,11 +515,11 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <h3 data-number="3.1" class="anchored" data-anchor-id="頑健なf検定wald検定"><span class="header-section-number">3.1</span> 頑健なF検定（Wald検定）</h3>
 <p><code>estimatr</code>パッケージの<code>waldtest</code>関数を用いて、頑健な標準誤差に基づいたF検定（Wald検定）を実行します。制約モデル<code>reg0</code>と非制約モデル<code>reg1</code>を、頑健な分散共分散行列<code>vcov</code>を用いて比較します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="co">#ミンサー方程式をOLSで重回帰</span></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>reg0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> income6) </span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co">#回帰の結果の確認</span></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="fu">waldtest</span>(reg0, reg1, <span class="at">vcov =</span> vcov)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co">#ミンサー方程式をOLSで重回帰</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>reg0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> income6) </span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="co">#回帰の結果の確認</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">waldtest</span>(reg0, reg1, <span class="at">vcov =</span> vcov)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Wald test
 
@@ -469,11 +538,11 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <h3 data-number="3.2" class="anchored" data-anchor-id="lm_robustによる頑健な標準誤差の推定"><span class="header-section-number">3.2</span> lm_robustによる頑健な標準誤差の推定</h3>
 <p><code>estimatr</code>パッケージの<code>lm_robust()</code>関数は、回帰モデルの推定と同時に頑健な標準誤差の計算を行います。<code>se_type = "stata"</code>を指定することで、一段階で不均一分散を考慮した推定結果を得ることができます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="co">#ミンサー方程式をOLSで重回帰</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>reg_lm <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2, <span class="at">data =</span> income6,<span class="at">se_type=</span><span class="st">"stata"</span>) </span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co">#回帰の結果の確認</span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(reg_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co">#ミンサー方程式をOLSで重回帰</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>reg_lm <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2, <span class="at">data =</span> income6,<span class="at">se_type=</span><span class="st">"stata"</span>) </span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co">#回帰の結果の確認</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(reg_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -499,9 +568,9 @@ F-statistic: 365.1 on 3 and 4295 DF,  p-value: &lt; 2.2e-16</code></pre>
 <h3 data-number="3.3" class="anchored" data-anchor-id="通常の標準誤差との比較"><span class="header-section-number">3.3</span> 通常の標準誤差との比較</h3>
 <p><code>lm_robust()</code>関数で<code>se_type = "classical"</code>を指定すると、通常のOLSの標準誤差が計算されます。これを前のチャンクで計算した頑健な標準誤差の結果（<code>reg_lm</code>）と比較することで、不均一分散が標準誤差の推定に与える影響の大きさを具体的に確認できます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>reg_0 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2, <span class="at">data =</span> income6,<span class="at">se_type=</span><span class="st">"classical"</span>) </span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co">#回帰の結果の確認</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(reg_0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>reg_0 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2, <span class="at">data =</span> income6,<span class="at">se_type=</span><span class="st">"classical"</span>) </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="co">#回帰の結果の確認</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(reg_0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -527,10 +596,10 @@ F-statistic: 372.8 on 3 and 4295 DF,  p-value: &lt; 2.2e-16</code></pre>
 <h3 data-number="3.4" class="anchored" data-anchor-id="頑健なモデル間のf検定"><span class="header-section-number">3.4</span> 頑健なモデル間のF検定</h3>
 <p><code>lm_robust()</code>で推定したモデル同士を比較する場合も<code>waldtest</code>を使用します。<code>se_type="stata"</code>を指定して推定した制約モデル<code>reg_lm0</code>と非制約モデル<code>reg_lm</code>を比較することで、頑健な標準誤差に基づいたF検定を行います。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>reg_lm0 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> income6, <span class="at">se_type=</span><span class="st">"stata"</span>) </span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co">#回帰の結果の確認</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="fu">waldtest</span>(reg_lm0,reg_lm,<span class="at">test =</span> <span class="st">"F"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>reg_lm0 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> income6, <span class="at">se_type=</span><span class="st">"stata"</span>) </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="co">#回帰の結果の確認</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="fu">waldtest</span>(reg_lm0,reg_lm,<span class="at">test =</span> <span class="st">"F"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Wald test
 
