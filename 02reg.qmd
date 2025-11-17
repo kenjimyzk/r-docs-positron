@@ -216,7 +216,6 @@ coeftest(reg1, vcov)
 `estimatr`パッケージの`waldtest`関数を用いて、頑健な標準誤差に基づいたF検定（Wald検定）を実行します。制約モデル`reg0`と非制約モデル`reg1`を、頑健な分散共分散行列`vcov`を用いて比較します。
 
 ```{r}
-library(estimatr)
 #ミンサー方程式をOLSで重回帰
 reg0 <- lm(lincome ~ yeduc, data = income6) 
 #回帰の結果の確認

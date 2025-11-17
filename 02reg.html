@@ -515,11 +515,10 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <h3 data-number="3.1" class="anchored" data-anchor-id="頑健なf検定wald検定"><span class="header-section-number">3.1</span> 頑健なF検定（Wald検定）</h3>
 <p><code>estimatr</code>パッケージの<code>waldtest</code>関数を用いて、頑健な標準誤差に基づいたF検定（Wald検定）を実行します。制約モデル<code>reg0</code>と非制約モデル<code>reg1</code>を、頑健な分散共分散行列<code>vcov</code>を用いて比較します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co">#ミンサー方程式をOLSで重回帰</span></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>reg0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> income6) </span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="co">#回帰の結果の確認</span></span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">waldtest</span>(reg0, reg1, <span class="at">vcov =</span> vcov)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">#ミンサー方程式をOLSで重回帰</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>reg0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc, <span class="at">data =</span> income6) </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co">#回帰の結果の確認</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="fu">waldtest</span>(reg0, reg1, <span class="at">vcov =</span> vcov)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Wald test
 
