@@ -142,65 +142,53 @@ window.Quarto = {
 <p>データフレーム（data.frame）とは、行と列からなる2次元のデータ構造で、各列が異なる変数（特徴量）を表し、各行が異なる観測（サンプル）を表します。Rではデータフレームを使って様々な統計解析やデータ操作を行います。</p>
 <p>ここでは、Rに標準で含まれるデータフレームの一つである<code>cars</code>を読み込み、最初と最後の数行を確認してどのような観測が含まれているかを把握します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  speed dist
-1     4    2
-2     4   10
-3     7    4
-4     7   22
-5     8   16
-6     9   10</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   speed dist
-45    23   54
-46    24   70
-47    24   92
-48    24   93
-49    24  120
-50    25   85</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(cars)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   speed dist</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     4    2</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     4   10</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3     7    4</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4     7   22</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5     8   16</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6     9   10</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(cars)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    speed dist</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 45    23   54</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 46    24   70</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 47    24   92</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 48    24   93</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 49    24  120</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 50    25   85</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>それぞれの変数の意味は<code>help(cars)</code>で確認できます。</p>
 <p>出力では先頭に速度4〜11mile/h・制動距離2〜26ft程度の観測、末尾に最大25mile/h・120ft近い観測が現れ、速度が上がるにつれて制動距離も大きくなる傾向が生データからも伺えます。</p>
 <p>データフレームがどのくらいの規模かを知るために、行数と列数を取得します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 50</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ncol</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(cars)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 50</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ncol</span>(cars)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><code>nrow(cars)</code> は観測数（サイズ・行数）を返し、<code>ncol(cars)</code> は変数数（次元・列数）を返します。</p>
 <p>実際の結果は行数50、列数2で、<code>cars</code> は速度と制動距離のみで構成されたコンパクトなデータセットであることが確認できます。</p>
 <p>変数の型や欠損値の有無など、データの構造を一覧で確認します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>'data.frame':   50 obs. of  2 variables:
- $ speed: num  4 4 7 7 8 9 10 10 10 11 ...
- $ dist : num  2 10 4 22 16 10 18 26 34 17 ...</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cars)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 'data.frame':    50 obs. of  2 variables:</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ speed: num  4 4 7 7 8 9 10 10 10 11 ...</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ dist : num  2 10 4 22 16 10 18 26 34 17 ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><code>$</code>記法を使って、特定の変数（ここでは<code>speed</code>と<code>dist</code>）のデータ型を個別に確認することもできます。</p>
 <p><code>str()</code> の出力では 50 行×2 列のデータフレームで、どちらの列も数値型かつ欠損が無いことが分かります。</p>
 <p>各列の要約統計量（平均・中央値・四分位数など）を一度に確認します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>     speed           dist       
- Min.   : 4.0   Min.   :  2.00  
- 1st Qu.:12.0   1st Qu.: 26.00  
- Median :15.0   Median : 36.00  
- Mean   :15.4   Mean   : 42.98  
- 3rd Qu.:19.0   3rd Qu.: 56.00  
- Max.   :25.0   Max.   :120.00  </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(cars)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      speed           dist       </span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Min.   : 4.0   Min.   :  2.00  </span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1st Qu.:12.0   1st Qu.: 26.00  </span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Median :15.0   Median : 36.00  </span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Mean   :15.4   Mean   : 42.98  </span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3rd Qu.:19.0   3rd Qu.: 56.00  </span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Max.   :25.0   Max.   :120.00</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><code>summary()</code> から、速度は4〜25mile/hの範囲にあり中央値15mile/h、制動距離は2〜120ftで中央値36ftと、どちらもやや右に裾が伸びる分布であることが読み取れます。</p>
 </section>
@@ -208,36 +196,26 @@ window.Quarto = {
 <h2 data-number="2" class="anchored" data-anchor-id="基本統計量"><span class="header-section-number">2</span> 基本統計量</h2>
 <p>速度と制動距離それぞれの平均値を求め、データのおおよその中心を把握します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(cars<span class="sc">$</span>speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 15.4</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(cars<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 42.98</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(cars<span class="sc">$</span>speed)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 15.4</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(cars<span class="sc">$</span>dist)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 42.98</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>計算結果は速度の平均が約15.4mile/h、制動距離の平均が約43ftで、標準的な観測の規模感を示しています。</p>
 <p>データを<span class="math inline">\(\{x_i\}_{i=1}^n\)</span>としたとき、平均値 <span class="math inline">\(\bar{x}\)</span> は <span class="math display">\[
 \bar{x} = \frac{1}{n}\sum_{i=1}^nx_i
 \]</span> で定義されます。 この定義をRで確かめることができます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(cars<span class="sc">$</span>speed) <span class="sc">/</span> <span class="fu">nrow</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 15.4</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(cars<span class="sc">$</span>speed) <span class="sc">/</span> <span class="fu">nrow</span>(cars)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 15.4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>この式でも 15.4 と表示され、<code>mean()</code> が理論式通りに動いていることを確認できます。</p>
 <p>分散を計算して、各変数がどの程度ばらついているかを確認します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(cars<span class="sc">$</span>speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 27.95918</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(cars<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 664.0608</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(cars<span class="sc">$</span>speed)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 27.95918</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(cars<span class="sc">$</span>dist)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 664.0608</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>結果は速度の分散が約27.96、制動距離の分散が約664で、距離の方が桁違いにばらつくことが分かります（単位の違いも影響しています）。</p>
 <p>データを<span class="math inline">\(\{x_i\}_{i=1}^n\)</span>としたとき、分散 <span class="math inline">\(s_x^2\)</span> は <span class="math display">\[　s_x^2 = \frac{1}{n-1}\sum_{i=1}^n(x_i-\bar{x})^2
@@ -246,46 +224,32 @@ window.Quarto = {
 \]</span></p>
 <p>この定義と性質をRで確かめることができます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>((cars<span class="sc">$</span>speed<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>speed))<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span>(<span class="fu">nrow</span>(cars)<span class="sc">-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 27.95918</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(cars<span class="sc">$</span>speed<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fu">mean</span>(cars<span class="sc">$</span>speed)<span class="sc">^</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 27.4</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>(<span class="fu">nrow</span>(cars)<span class="sc">-</span><span class="dv">1</span>)<span class="sc">/</span><span class="fu">nrow</span>(cars)<span class="sc">*</span><span class="fu">var</span>(cars<span class="sc">$</span>speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 27.4</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>((cars<span class="sc">$</span>speed<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>speed))<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span>(<span class="fu">nrow</span>(cars)<span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 27.95918</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(cars<span class="sc">$</span>speed<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="fu">mean</span>(cars<span class="sc">$</span>speed)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 27.4</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>(<span class="fu">nrow</span>(cars)<span class="sc">-</span><span class="dv">1</span>)<span class="sc">/</span><span class="fu">nrow</span>(cars)<span class="sc">*</span><span class="fu">var</span>(cars<span class="sc">$</span>speed)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 27.4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>3つの値はいずれも 27.95918 となり、分散の定義や公式同士が一致することを数値で確認できました。</p>
 <p>標準偏差 <span class="math inline">\(s_x\)</span> を求めることで、平均からどれくらい離れている観測が多いかを直感的に把握します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(cars<span class="sc">$</span>speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 5.287644</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(cars<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 25.76938</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(cars<span class="sc">$</span>speed)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 5.287644</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(cars<span class="sc">$</span>dist)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 25.76938</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>速度の標準偏差は約5.29、制動距離は約25.77なので、速度は平均±5mile/h程度、距離は±26ft程度の幅で散らばっていると言えます。</p>
 <p>標準偏差は分散の平方根を返すので、以下と同じ結果になります。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">var</span>(cars<span class="sc">$</span>speed))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 5.287644</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">var</span>(cars<span class="sc">$</span>speed))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 5.287644</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>こちらも 5.287644 と表示され、<code>sd()</code> と完全に一致します。</p>
 <p>速度と制動距離の共分散を計算し、両者の関係が正か負かを調べます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 109.9469</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 109.9469</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>数値は 109.95 と正で、速度が高い観測ほど制動距離も長くなる傾向があることを示します。</p>
 <p>データを<span class="math inline">\(\{x_i,y_i\}_{i=1}^n\)</span>としたとき、共分散 <span class="math inline">\(s_{xy}\)</span> は <span class="math display">\[　s_{xy} = \frac{1}{n-1}\sum_{i=1}^n(x_i-\bar{x})(y_i-\bar{y})
@@ -294,26 +258,18 @@ window.Quarto = {
 \]</span></p>
 <p>この定義と性質をRで確かめることができます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>((cars<span class="sc">$</span>speed<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>speed))<span class="sc">*</span>(cars<span class="sc">$</span>dist<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>dist)))<span class="sc">/</span>(<span class="fu">nrow</span>(cars)<span class="sc">-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 109.9469</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(cars<span class="sc">$</span>speed<span class="sc">*</span>cars<span class="sc">$</span>dist)<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>speed)<span class="sc">*</span><span class="fu">mean</span>(cars<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 107.748</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars<span class="sc">$</span>speed,cars<span class="sc">$</span>dist)<span class="sc">*</span>(<span class="fu">nrow</span>(cars)<span class="sc">-</span><span class="dv">1</span>)<span class="sc">/</span><span class="fu">nrow</span>(cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 107.748</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>((cars<span class="sc">$</span>speed<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>speed))<span class="sc">*</span>(cars<span class="sc">$</span>dist<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>dist)))<span class="sc">/</span>(<span class="fu">nrow</span>(cars)<span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 109.9469</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(cars<span class="sc">$</span>speed<span class="sc">*</span>cars<span class="sc">$</span>dist)<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>speed)<span class="sc">*</span><span class="fu">mean</span>(cars<span class="sc">$</span>dist)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 107.748</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars<span class="sc">$</span>speed,cars<span class="sc">$</span>dist)<span class="sc">*</span>(<span class="fu">nrow</span>(cars)<span class="sc">-</span><span class="dv">1</span>)<span class="sc">/</span><span class="fu">nrow</span>(cars)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 107.748</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>いずれの計算でも 109.9469 が得られ、公式の違いによらず一貫して正の共分散だと確認できます。</p>
 <p>相関係数を計算して、速度と制動距離の関係の強さを-1から1の範囲で確認します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8068949</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.8068949</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>相関係数 <span class="math inline">\(r_{xy}\)</span> は以下で定義されます。 <span class="math display">\[
 r_{xy} = \frac{s_{xy}}{s_x s_y}
@@ -321,16 +277,12 @@ r_{xy} = \frac{s_{xy}}{s_x s_y}
 r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{y_i-\bar{y}}{s_y}\right)
 \]</span> この定義と性質をRで確かめることができます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars<span class="sc">$</span>speed,cars<span class="sc">$</span>dist)<span class="sc">/</span>(<span class="fu">sd</span>(cars<span class="sc">$</span>speed)<span class="sc">*</span><span class="fu">sd</span>(cars<span class="sc">$</span>dist))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8068949</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>zx<span class="ot">&lt;-</span> (cars<span class="sc">$</span>speed<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>speed))<span class="sc">/</span><span class="fu">sd</span>(cars<span class="sc">$</span>speed)</span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>zy<span class="ot">&lt;-</span> (cars<span class="sc">$</span>dist<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>dist))<span class="sc">/</span><span class="fu">sd</span>(cars<span class="sc">$</span>dist)</span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(zx,zy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8068949</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars<span class="sc">$</span>speed,cars<span class="sc">$</span>dist)<span class="sc">/</span>(<span class="fu">sd</span>(cars<span class="sc">$</span>speed)<span class="sc">*</span><span class="fu">sd</span>(cars<span class="sc">$</span>dist))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.8068949</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>zx<span class="ot">&lt;-</span> (cars<span class="sc">$</span>speed<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>speed))<span class="sc">/</span><span class="fu">sd</span>(cars<span class="sc">$</span>speed)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>zy<span class="ot">&lt;-</span> (cars<span class="sc">$</span>dist<span class="sc">-</span><span class="fu">mean</span>(cars<span class="sc">$</span>dist))<span class="sc">/</span><span class="fu">sd</span>(cars<span class="sc">$</span>dist)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(zx,zy)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.8068949</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>相関係数はいずれの方法でも 0.807 前後となり、速度と制動距離が強めの正の直線関係にあることを数値で裏付けています。</p>
 </section>
@@ -338,7 +290,7 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 <h2 data-number="3" class="anchored" data-anchor-id="作図"><span class="header-section-number">3</span> 作図</h2>
 <p>速度のヒストグラムを描き、データの分布をざっくり確認します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(cars<span class="sc">$</span>speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(cars<span class="sc">$</span>speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -350,7 +302,7 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 <p>ヒストグラムから、速度は12〜20mile/h付近に集中しつつ25mile/h付近まで裾が伸びるやや右裾の分布であることが視覚的に分かります。</p>
 <p>ビンの数や色、タイトルなどを指定してヒストグラムの見た目を調整します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(cars<span class="sc">$</span>speed, <span class="at">breaks =</span> <span class="dv">10</span>, <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">main =</span> <span class="st">"Histogram of Speed"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(cars<span class="sc">$</span>speed, <span class="at">breaks =</span> <span class="dv">10</span>, <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">main =</span> <span class="st">"Histogram of Speed"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -362,7 +314,7 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 <p>ビンを増やした図では中速域（14〜18mile/h）で柱が高く、低速域や高速域は観測が少ないことがより明瞭になります。</p>
 <p>速度を横軸、制動距離を縦軸にして散布図を描き、両者の関係を視覚化します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -374,7 +326,7 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 <p>点は右上がりに並び、速度が増すほど制動距離も伸びる傾向を視覚的に確認できます。</p>
 <p>Formula（<code>dist ~ speed</code>）を使って同じ散布図を描く別の書き方です。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist<span class="sc">~</span>speed, <span class="at">data =</span> cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist<span class="sc">~</span>speed, <span class="at">data =</span> cars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -386,7 +338,7 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 <p>こちらも同様に右上がりの雲が得られ、書き方が違っても同じ情報を描けることが分かります。</p>
 <p>タイトルや色、点の形などを指定して散布図をさらに見やすく調整します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist<span class="sc">~</span>speed, <span class="at">data =</span> cars, <span class="at">main =</span> <span class="st">"Distance vs Speed"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>, <span class="at">ylab =</span> <span class="st">"Distance"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist<span class="sc">~</span>speed, <span class="at">data =</span> cars, <span class="at">main =</span> <span class="st">"Distance vs Speed"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>, <span class="at">ylab =</span> <span class="st">"Distance"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -401,28 +353,26 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 <h2 data-number="4" class="anchored" data-anchor-id="回帰分析"><span class="header-section-number">4</span> 回帰分析</h2>
 <p>速度から制動距離を予測する<strong>単回帰モデル</strong>を作成し、その結果を要約します。単回帰分析は、1つの説明変数（原因）から1つの被説明変数（結果）を予測する統計手法です。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(dist <span class="sc">~</span> speed, <span class="at">data =</span> cars)</span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-lm(formula = dist ~ speed, data = cars)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--29.069  -9.525  -2.272   9.215  43.201 
-
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) -17.5791     6.7584  -2.601   0.0123 *  
-speed         3.9324     0.4155   9.464 1.49e-12 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 15.38 on 48 degrees of freedom
-Multiple R-squared:  0.6511,    Adjusted R-squared:  0.6438 
-F-statistic: 89.57 on 1 and 48 DF,  p-value: 1.49e-12</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(dist <span class="sc">~</span> speed, <span class="at">data =</span> cars)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm(formula = dist ~ speed, data = cars)</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Min      1Q  Median      3Q     Max </span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -29.069  -9.525  -2.272   9.215  43.201 </span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept) -17.5791     6.7584  -2.601   0.0123 *  </span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; speed         3.9324     0.4155   9.464 1.49e-12 ***</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 15.38 on 48 degrees of freedom</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.6511, Adjusted R-squared:  0.6438 </span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 89.57 on 1 and 48 DF,  p-value: 1.49e-12</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>それぞれの実行コードの説明は以下の通りです。</p>
 <ol type="1">
@@ -432,10 +382,8 @@ F-statistic: 89.57 on 1 and 48 DF,  p-value: 1.49e-12</code></pre>
 <p>具体的には、切片が -17.6（p=0.012）で速度0の想定時に負の距離が推定される点や、傾きが 3.93（p&lt;0.001）で速度が1mile/h増えると制動距離が約4ft伸びると推測される点、決定係数 <span class="math inline">\(R^2=0.65\)</span> でデータの約65%を説明できる点などが読み取れます。</p>
 <p>データを<span class="math inline">\(\{x_i,y_i\}_{i=1}^n\)</span>としたとき、単回帰モデルの傾き <span class="math inline">\(\hat{\beta}_1\)</span> は <span class="math inline">\(\hat{\beta}_1 = s_{xy}/s_x^2\)</span> です。 このことは以下のRコードで確かめることができます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist) <span class="sc">/</span> <span class="fu">var</span>(cars<span class="sc">$</span>speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 3.932409</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars<span class="sc">$</span>speed, cars<span class="sc">$</span>dist) <span class="sc">/</span> <span class="fu">var</span>(cars<span class="sc">$</span>speed)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 3.932409</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>計算結果は 3.932409 で、<code>summary(model)</code> で得た傾きと完全に一致します。</p>
 <p>予測値 <span class="math inline">\(\hat{y}_i=\hat{\beta}_0+\hat{\beta}_1x_i\)</span> とし、 残差<span class="math inline">\(\hat{u}_i=y_i-\hat{y}_i\)</span> としたとき、 決定係数 <span class="math inline">\(R^2\)</span> は以下で定義されます。 <span class="math display">\[
@@ -444,20 +392,16 @@ R^2=1-\frac{\sum\hat{u}_i^2}{\sum(y_i-\bar{y})^2}
 <p>Rでは、決定係数は<code>summary(model)$r.squared</code>で取得できますし、残差は<code>residuals(model)</code>で取得できますので、以下のようにして求めることもできます。</p>
 <p>決定係数を2通りの方法で求め、モデルがどれくらいデータを説明できているかを確認します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model)<span class="sc">$</span>r.squared</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.6510794</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">-</span> <span class="fu">sum</span>(<span class="fu">residuals</span>(model)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> <span class="fu">sum</span>((cars<span class="sc">$</span>dist <span class="sc">-</span> <span class="fu">mean</span>(cars<span class="sc">$</span>dist))<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.6510794</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model)<span class="sc">$</span>r.squared</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.6510794</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">-</span> <span class="fu">sum</span>(<span class="fu">residuals</span>(model)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> <span class="fu">sum</span>((cars<span class="sc">$</span>dist <span class="sc">-</span> <span class="fu">mean</span>(cars<span class="sc">$</span>dist))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.6510794</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>いずれの式でも 0.651 と算出され、速度だけで距離の変動の約65%を説明できるモデルであることが分かります。</p>
 <p><code>abline()</code>関数を使って、散布図に回帰直線を重ねて描画します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist <span class="sc">~</span> speed, <span class="at">data =</span> cars, <span class="at">main =</span> <span class="st">"Distance vs Speed with Regression Line"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>, <span class="at">ylab =</span> <span class="st">"Distance"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span>
-<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(model, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist <span class="sc">~</span> speed, <span class="at">data =</span> cars, <span class="at">main =</span> <span class="st">"Distance vs Speed with Regression Line"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>, <span class="at">ylab =</span> <span class="st">"Distance"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(model, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -472,18 +416,16 @@ R^2=1-\frac{\sum\hat{u}_i^2}{\sum(y_i-\bar{y})^2}
 <h2 data-number="5" class="anchored" data-anchor-id="データ読み込み"><span class="header-section-number">5</span> データ読み込み</h2>
 <p>CSVファイルを読み込む際は基本的に <code>read.csv()</code> を使用します。ヘッダーがある場合は <code>header = TRUE（既定）</code>で良いですが、文字列を因子化したくない場合は <code>stringsAsFactors = FALSE</code> を指定したり、区切り文字や文字コード（<code>fileEncoding = "UTF-8"</code> や <code>"CP932"</code>など）を明示することが実務的です。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="do">## df &lt;- read.table("6_1_income.csv", header = TRUE, sep = ",")</span></span>
-<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"6_1_income.csv"</span>)</span>
-<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  exper exper2 yeduc income  lincome
-1     7     49     9    100 4.605170
-2     8     64     9    150 5.010635
-3     8     64     9    150 5.010635
-4    10    100     9    200 5.298317
-5    10    100     9    300 5.703783
-6    11    121     9    150 5.010635</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="do">## df &lt;- read.table("6_1_income.csv", header = TRUE, sep = ",")</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"6_1_income.csv"</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   exper exper2 yeduc income  lincome</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     7     49     9    100 4.605170</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     8     64     9    150 5.010635</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3     8     64     9    150 5.010635</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    10    100     9    200 5.298317</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    10    100     9    300 5.703783</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    11    121     9    150 5.010635</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>汎用テキストやカスタム区切りのファイルには <code>read.table()</code> を使いますが、高速で堅牢な読み込みが必要な場合は <code>read.csv()</code> の利用を推奨します。 より高速な読み込みが必要な場合は、<code>readr</code>パッケージの<code>read_csv()</code>も選択肢です。<code>read_csv()</code>は高速で、自動的にtibble形式で返し、列の型推定も柔軟です。</p>
 </section>

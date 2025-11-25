@@ -10,6 +10,13 @@ format:
      pdf-engine: lualatex
      documentclass: ltjsarticle
      classoption: lualatex,ja=standard
+execute: 
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    comment: "#>"
+    collapse: true
 editor: source
 ---
 

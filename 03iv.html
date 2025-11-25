@@ -113,49 +113,52 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>このような内生性の問題に対処するために用いられるのが<strong>操作変数法（IV法）</strong>です。</p>
 <section id="データの読み込み" class="level3" data-number="1.1">
 <h3 data-number="1.1" class="anchored" data-anchor-id="データの読み込み"><span class="header-section-number">1.1</span> データの読み込み</h3>
-<p>まず、データを読み込みます。ここでは <code>8_income.csv</code> を使用します。</p>
+<p>まず、データを読み込みます。ここでは <code>8_income.csv</code> を使用します。主な変数は以下の通りです。</p>
+<ul>
+<li><code>lincome</code>: 賃金の対数値</li>
+<li><code>yeduc</code>: 教育年数</li>
+<li><code>exper</code>: 経験年数</li>
+<li><code>payeduc</code>: 親の教育費支払い能力（操作変数）</li>
+<li><code>sibs</code>: 兄弟姉妹数（操作変数）</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>income8 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"8_income.csv"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(income8)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  exper exper2 mbirth moyeduc payeduc sibs yeduc  lincome
-1    19    361      6       9       9    1     9 5.703783
-2    19    361      4      12      12    1     9 5.991465
-3    19    361      1       9       9    1     9 6.214608
-4    19    361      9       9       9    1     9 6.214608
-5    23    529      8       9       9    3     9 6.309918
-6    23    529     11      12      13    2     9 6.309918</code></pre>
-</div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(income8)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   exper exper2 mbirth moyeduc payeduc sibs yeduc  lincome</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1    19    361      6       9       9    1     9 5.703783</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2    19    361      4      12      12    1     9 5.991465</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3    19    361      1       9       9    1     9 6.214608</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4    19    361      9       9       9    1     9 6.214608</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    23    529      8       9       9    3     9 6.309918</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    23    529     11      12      13    2     9 6.309918</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="olsによる推定ベースライン" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="olsによる推定ベースライン"><span class="header-section-number">1.2</span> OLSによる推定（ベースライン）</h3>
 <p>比較のために、まずは通常の最小二乗法（OLS）でミンサー方程式を推定します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2, <span class="at">data =</span> income8)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(reg1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-lm(formula = lincome ~ yeduc + exper + exper2, data = income8)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--1.36671 -0.15058 -0.00815  0.15856  1.25601 
-
-Coefficients:
-              Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  4.3197739  0.1387946  31.124  &lt; 2e-16 ***
-yeduc        0.0842350  0.0062404  13.498  &lt; 2e-16 ***
-exper        0.0576637  0.0152888   3.772 0.000175 ***
-exper2      -0.0008313  0.0005259  -1.581 0.114371    
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.3092 on 730 degrees of freedom
-Multiple R-squared:  0.2487,    Adjusted R-squared:  0.2456 
-F-statistic: 80.53 on 3 and 730 DF,  p-value: &lt; 2.2e-16</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2, <span class="at">data =</span> income8)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(reg1)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm(formula = lincome ~ yeduc + exper + exper2, data = income8)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      Min       1Q   Median       3Q      Max </span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -1.36671 -0.15058 -0.00815  0.15856  1.25601 </span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.3197739  0.1387946  31.124  &lt; 2e-16 ***</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; yeduc        0.0842350  0.0062404  13.498  &lt; 2e-16 ***</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper        0.0576637  0.0152888   3.772 0.000175 ***</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2      -0.0008313  0.0005259  -1.581 0.114371    </span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 0.3092 on 730 degrees of freedom</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.2487, Adjusted R-squared:  0.2456 </span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 80.53 on 3 and 730 DF,  p-value: &lt; 2.2e-16</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><code>summary(reg1)</code> の結果を確認すると、教育年数 <code>yeduc</code> の係数は正で有意であることがわかります。しかし、前述の通り、この推定値には内生性によるバイアスが含まれている可能性があります。</p>
 </section>
@@ -169,35 +172,33 @@ F-statistic: 80.53 on 3 and 730 DF,  p-value: &lt; 2.2e-16</code></pre>
 </ol>
 <p>Rで操作変数法を行うには、<code>AER</code> パッケージの <code>ivreg()</code> 関数が便利です。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AER)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 操作変数法による推定</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 式の書き方: 従属変数 ~ 内生変数 + 外生変数 | 操作変数 + 外生変数</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ivreg1 <span class="ot">&lt;-</span> <span class="fu">ivreg</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc, <span class="at">data =</span> income8)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-ivreg(formula = lincome ~ yeduc + exper + exper2 | exper + exper2 + 
-    payeduc, data = income8)
-
-Residuals:
-      Min        1Q    Median        3Q       Max 
--1.350328 -0.146688 -0.009026  0.162186  1.236270 
-
-Coefficients:
-              Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  4.4485971  0.3489064  12.750  &lt; 2e-16 ***
-yeduc        0.0752049  0.0232869   3.230 0.001296 ** 
-exper        0.0597410  0.0161570   3.698 0.000234 ***
-exper2      -0.0009639  0.0006213  -1.552 0.121191    
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.3097 on 730 degrees of freedom
-Multiple R-Squared: 0.2465, Adjusted R-squared: 0.2434 
-Wald test: 23.22 on 3 and 730 DF,  p-value: 2.31e-14 </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AER)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 操作変数法による推定</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 式の書き方: 従属変数 ~ 内生変数 + 外生変数 | 操作変数 + 外生変数</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ivreg1 <span class="ot">&lt;-</span> <span class="fu">ivreg</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc, <span class="at">data =</span> income8)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg1)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ivreg(formula = lincome ~ yeduc + exper + exper2 | exper + exper2 + </span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     payeduc, data = income8)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Min        1Q    Median        3Q       Max </span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -1.350328 -0.146688 -0.009026  0.162186  1.236270 </span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.4485971  0.3489064  12.750  &lt; 2e-16 ***</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; yeduc        0.0752049  0.0232869   3.230 0.001296 ** </span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper        0.0597410  0.0161570   3.698 0.000234 ***</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2      -0.0009639  0.0006213  -1.552 0.121191    </span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 0.3097 on 730 degrees of freedom</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-Squared: 0.2465,  Adjusted R-squared: 0.2434 </span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Wald test: 23.22 on 3 and 730 DF,  p-value: 2.31e-14</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><code>ivreg()</code> の式の <code>|</code> の右側には、<strong>モデルに含まれるすべての外生変数</strong>（ここでは <code>exper</code>, <code>exper2</code>）と、<strong>操作変数</strong>（<code>payeduc</code>）を記述します。内生変数である <code>yeduc</code> は右側には含めません。</p>
 </section>
@@ -219,33 +220,31 @@ Wald test: 23.22 on 3 and 730 DF,  p-value: 2.31e-14 </code></pre>
 <h3 data-number="2.1" class="anchored" data-anchor-id="ivregによる推定"><span class="header-section-number">2.1</span> ivregによる推定</h3>
 <p><code>ivreg()</code>関数の <code>|</code> の右側に <code>sibs</code> を追加します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 兄弟姉妹数（sibs）も操作変数として追加</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ivreg2 <span class="ot">&lt;-</span> <span class="fu">ivreg</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-ivreg(formula = lincome ~ yeduc + exper + exper2 | exper + exper2 + 
-    payeduc + sibs, data = income8)
-
-Residuals:
-      Min        1Q    Median        3Q       Max 
--1.340720 -0.153748 -0.009586  0.163970  1.224695 
-
-Coefficients:
-              Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  4.5241448  0.3286803  13.765  &lt; 2e-16 ***
-yeduc        0.0699093  0.0217875   3.209 0.001392 ** 
-exper        0.0609592  0.0160773   3.792 0.000162 ***
-exper2      -0.0010417  0.0006104  -1.707 0.088290 .  
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.3103 on 730 degrees of freedom
-Multiple R-Squared: 0.2432, Adjusted R-squared: 0.2401 
-Wald test: 23.09 on 3 and 730 DF,  p-value: 2.753e-14 </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 兄弟姉妹数（sibs）も操作変数として追加</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ivreg2 <span class="ot">&lt;-</span> <span class="fu">ivreg</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg2)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ivreg(formula = lincome ~ yeduc + exper + exper2 | exper + exper2 + </span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     payeduc + sibs, data = income8)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Min        1Q    Median        3Q       Max </span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -1.340720 -0.153748 -0.009586  0.163970  1.224695 </span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.5241448  0.3286803  13.765  &lt; 2e-16 ***</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; yeduc        0.0699093  0.0217875   3.209 0.001392 ** </span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper        0.0609592  0.0160773   3.792 0.000162 ***</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2      -0.0010417  0.0006104  -1.707 0.088290 .  </span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 0.3103 on 730 degrees of freedom</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-Squared: 0.2432,  Adjusted R-squared: 0.2401 </span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Wald test: 23.09 on 3 and 730 DF,  p-value: 2.753e-14</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="段階最小二乗法2slsの手動計算" class="level3" data-number="2.2">
@@ -256,34 +255,32 @@ Wald test: 23.09 on 3 and 730 DF,  p-value: 2.753e-14 </code></pre>
 <li><strong>第2段階</strong>: 本来の回帰式の内生変数（<code>yeduc</code>）を、第1段階で求めた予測値に置き換えて回帰を行います。</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 第1段階：内生変数（yeduc）をすべての外生変数に回帰</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ols1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(yeduc <span class="sc">~</span> exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 第2段階：yeducの予測値（fitted(ols1)）を使って本回帰</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>ols2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> <span class="fu">fitted</span>(ols1) <span class="sc">+</span> exper <span class="sc">+</span> exper2, <span class="at">data =</span> income8)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ols2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-lm(formula = lincome ~ fitted(ols1) + exper + exper2, data = income8)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--1.1985 -0.2114  0.0001  0.1888  1.1450 
-
-Coefficients:
-              Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)   4.524145   0.364011  12.429  &lt; 2e-16 ***
-fitted(ols1)  0.069909   0.024130   2.897 0.003877 ** 
-exper         0.060959   0.017805   3.424 0.000652 ***
-exper2       -0.001042   0.000676  -1.541 0.123722    
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.3437 on 730 degrees of freedom
-Multiple R-squared:  0.0718,    Adjusted R-squared:  0.06799 
-F-statistic: 18.82 on 3 and 730 DF,  p-value: 9.08e-12</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 第1段階：内生変数（yeduc）をすべての外生変数に回帰</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ols1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(yeduc <span class="sc">~</span> exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 第2段階：yeducの予測値（fitted(ols1)）を使って本回帰</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>ols2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> <span class="fu">fitted</span>(ols1) <span class="sc">+</span> exper <span class="sc">+</span> exper2, <span class="at">data =</span> income8)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ols2)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm(formula = lincome ~ fitted(ols1) + exper + exper2, data = income8)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Min      1Q  Median      3Q     Max </span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -1.1985 -0.2114  0.0001  0.1888  1.1450 </span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)   4.524145   0.364011  12.429  &lt; 2e-16 ***</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; fitted(ols1)  0.069909   0.024130   2.897 0.003877 ** </span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper         0.060959   0.017805   3.424 0.000652 ***</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2       -0.001042   0.000676  -1.541 0.123722    </span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 0.3437 on 730 degrees of freedom</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.0718, Adjusted R-squared:  0.06799 </span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 18.82 on 3 and 730 DF,  p-value: 9.08e-12</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>手動計算による <code>fitted(ols1)</code> の係数は、<code>ivreg2</code> の <code>yeduc</code> の係数と一致することを確認してください。これにより、操作変数法が <strong>内生変数のうち、外生変数によって説明できる部分（予測値）</strong> のみを使って回帰を行っていることがわかります。ただし、標準誤差は異なっているために検定に使えません。</p>
 </section>
@@ -293,7 +290,7 @@ F-statistic: 18.82 on 3 and 730 DF,  p-value: 9.08e-12</code></pre>
 <ul>
 <li><strong>IV推定値（<code>yeduc</code>）</strong>: 約 0.070</li>
 </ul>
-<p>単一の操作変数を用いた場合（約0.075）と比較して、推定値はさらに少し小さくなりましたが、大きな違いはありません。また、統計的有意性も維持されています（p値 &lt; 0.01）。 複数の操作変数を用いることで、推定の効率性が向上する可能性がありますが、同時に過剰識別検定（Sargan検定など）を行うことで操作変数の妥当性をチェックすることも可能になります（ここでは省略）。 兄弟姉妹数を操作変数に追加しても、教育の収益率が約7%程度であるという結論は頑健であることが示唆されます。</p>
+<p>単一の操作変数を用いた場合（約0.075）と比較して、推定値はさらに少し小さくなりましたが、大きな違いはありません。また、統計的有意性も維持されています（p値 &lt; 0.01）。 複数の操作変数を用いることで、推定の効率性が向上する可能性がありますが、同時に過剰識別検定（Sargan検定など）を行うことで操作変数の妥当性をチェックすることも可能になります（後述の「診断統計量」の節で詳しく扱います）。 兄弟姉妹数を操作変数に追加しても、教育の収益率が約7%程度であるという結論は頑健であることが示唆されます。</p>
 </section>
 </section>
 <section id="ivregの拡張機能" class="level2" data-number="3">
@@ -301,38 +298,36 @@ F-statistic: 18.82 on 3 and 730 DF,  p-value: 9.08e-12</code></pre>
 <p><code>ivreg</code>関数には、多くの拡張機能があります。</p>
 <section id="診断統計量" class="level3" data-number="3.1">
 <h3 data-number="3.1" class="anchored" data-anchor-id="診断統計量"><span class="header-section-number">3.1</span> 診断統計量</h3>
-<p><code>summary()</code> 関数に <code>diagnostics = TRUE</code> オプションを指定することで、操作変数の妥当性を評価するための診断統計量を確認できます。これには、<strong>弱操作変数検定</strong> （Weak Instrument Test）や、<strong>Wu-Hausman</strong>（ハウスマン検定）や、<strong>過剰識別検定</strong> （Sargan Test）などが含まれます。弱操作変数検定は、操作変数が内生変数と十分に相関しているか（関連性条件）を評価し、過剰識別検定は、複数の操作変数がある場合に、それらがすべて外生性条件を満たしているか（誤差項と相関がないか）を評価します。</p>
+<p><code>summary()</code> 関数に <code>diagnostics = TRUE</code> オプションを指定することで、操作変数の妥当性を評価するための診断統計量を確認できます。これには、<strong>弱操作変数検定</strong> （Weak Instrument Test）、<strong>Wu-Hausman</strong>（ハウスマン検定）、<strong>過剰識別検定</strong> （Sargan Test）などが含まれます。弱操作変数検定は、操作変数が内生変数と十分に相関しているか（関連性条件）を評価し、過剰識別検定は、複数の操作変数がある場合に、それらがすべて外生性条件を満たしているか（誤差項と相関がないか）を評価します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg2, <span class="at">diagnostics =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-ivreg(formula = lincome ~ yeduc + exper + exper2 | exper + exper2 + 
-    payeduc + sibs, data = income8)
-
-Residuals:
-      Min        1Q    Median        3Q       Max 
--1.340720 -0.153748 -0.009586  0.163970  1.224695 
-
-Coefficients:
-              Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  4.5241448  0.3286803  13.765  &lt; 2e-16 ***
-yeduc        0.0699093  0.0217875   3.209 0.001392 ** 
-exper        0.0609592  0.0160773   3.792 0.000162 ***
-exper2      -0.0010417  0.0006104  -1.707 0.088290 .  
-
-Diagnostic tests:
-                 df1 df2 statistic  p-value    
-Weak instruments   2 729    32.831 2.23e-14 ***
-Wu-Hausman         1 729     0.474    0.491    
-Sargan             1  NA     0.403    0.525    
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.3103 on 730 degrees of freedom
-Multiple R-Squared: 0.2432, Adjusted R-squared: 0.2401 
-Wald test: 23.09 on 3 and 730 DF,  p-value: 2.753e-14 </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg2, <span class="at">diagnostics =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ivreg(formula = lincome ~ yeduc + exper + exper2 | exper + exper2 + </span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     payeduc + sibs, data = income8)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Min        1Q    Median        3Q       Max </span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -1.340720 -0.153748 -0.009586  0.163970  1.224695 </span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.5241448  0.3286803  13.765  &lt; 2e-16 ***</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; yeduc        0.0699093  0.0217875   3.209 0.001392 ** </span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper        0.0609592  0.0160773   3.792 0.000162 ***</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2      -0.0010417  0.0006104  -1.707 0.088290 .  </span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Diagnostic tests:</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  df1 df2 statistic  p-value    </span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Weak instruments   2 729    32.831 2.23e-14 ***</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Wu-Hausman         1 729     0.474    0.491    </span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Sargan             1  NA     0.403    0.525    </span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 0.3103 on 730 degrees of freedom</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-Squared: 0.2432,  Adjusted R-squared: 0.2401 </span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Wald test: 23.09 on 3 and 730 DF,  p-value: 2.753e-14</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>診断結果の解釈は以下の通りです。</p>
 <ul>
@@ -346,30 +341,28 @@ Wald test: 23.09 on 3 and 730 DF,  p-value: 2.753e-14 </code></pre>
 <h3 data-number="3.2" class="anchored" data-anchor-id="ロバスト標準誤差"><span class="header-section-number">3.2</span> ロバスト標準誤差</h3>
 <p>回帰分析において、誤差項の分散が均一でない <strong>不均一分散</strong> （heteroskedasticity）が存在する場合、通常の標準誤差は過小評価される傾向があり、統計的推論が誤る可能性があります。このような場合、<code>summary()</code> 関数に <code>vcov</code> オプションを指定し、<code>vcovHC()</code> 関数（<code>sandwich</code> パッケージ由来）を用いて <strong>ロバスト標準誤差</strong> （robust standard errors）を計算することで、不均一分散に頑健な標準誤差を得ることができます。<code>type = "HC1"</code> は、ロバスト標準誤差の計算方法の一つを指定しています。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg2, <span class="at">vcov =</span> <span class="fu">vcovHC</span>(ivreg2, <span class="at">type =</span> <span class="st">"HC1"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-ivreg(formula = lincome ~ yeduc + exper + exper2 | exper + exper2 + 
-    payeduc + sibs, data = income8)
-
-Residuals:
-      Min        1Q    Median        3Q       Max 
--1.340720 -0.153748 -0.009586  0.163970  1.224695 
-
-Coefficients:
-              Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  4.5241448  0.3252807  13.908  &lt; 2e-16 ***
-yeduc        0.0699093  0.0218722   3.196 0.001452 ** 
-exper        0.0609592  0.0156393   3.898 0.000106 ***
-exper2      -0.0010417  0.0005904  -1.764 0.078095 .  
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.3103 on 730 degrees of freedom
-Multiple R-Squared: 0.2432, Adjusted R-squared: 0.2401 
-Wald test: 25.21 on 3 and 730 DF,  p-value: 1.577e-15 </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg2, <span class="at">vcov =</span> <span class="fu">vcovHC</span>(ivreg2, <span class="at">type =</span> <span class="st">"HC1"</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ivreg(formula = lincome ~ yeduc + exper + exper2 | exper + exper2 + </span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     payeduc + sibs, data = income8)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       Min        1Q    Median        3Q       Max </span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -1.340720 -0.153748 -0.009586  0.163970  1.224695 </span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.5241448  0.3252807  13.908  &lt; 2e-16 ***</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; yeduc        0.0699093  0.0218722   3.196 0.001452 ** </span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper        0.0609592  0.0156393   3.898 0.000106 ***</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2      -0.0010417  0.0005904  -1.764 0.078095 .  </span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 0.3103 on 730 degrees of freedom</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-Squared: 0.2432,  Adjusted R-squared: 0.2401 </span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Wald test: 25.21 on 3 and 730 DF,  p-value: 1.577e-15</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>ロバスト標準誤差を用いた場合でも、<code>yeduc</code> の係数は有意（p &lt; 0.01）であり、教育の効果が統計的に確からしいことが支持されます。通常の標準誤差と比較して、標準誤差の値がどのように変化しているかを確認することも重要です（ここでは大きな変化は見られません）。</p>
 <p>なお、<code>diagnostics = TRUE</code> を同時に指定することで、診断統計量を含めて確認できますが、その場合、通常の標準誤差の結果となることに注意されたい。</p>
@@ -379,73 +372,70 @@ Wald test: 25.21 on 3 and 730 DF,  p-value: 1.577e-15 </code></pre>
 <h2 data-number="4" class="anchored" data-anchor-id="estimatrパッケージ"><span class="header-section-number">4</span> estimatrパッケージ</h2>
 <p><code>estimatr</code>パッケージは、<code>ivreg</code>関数を用いて操作変数法を実行する際に、より簡単に診断統計量を確認することができます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ivreg3 <span class="ot">&lt;-</span> <span class="fu">iv_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span> exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8, <span class="at">se_type =</span> <span class="st">"HC1"</span>, <span class="at">diagnostics =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-iv_robust(formula = lincome ~ yeduc + exper + exper2 | exper + 
-    exper2 + payeduc + sibs, data = income8, se_type = "HC1", 
-    diagnostics = TRUE)
-
-Standard error type:  HC1 
-
-Coefficients:
-             Estimate Std. Error t value  Pr(&gt;|t|)  CI Lower  CI Upper  DF
-(Intercept)  4.524145  0.3252807  13.908 3.510e-39  3.885548 5.1627420 730
-yeduc        0.069909  0.0218722   3.196 1.452e-03  0.026969 0.1128492 730
-exper        0.060959  0.0156393   3.898 1.060e-04  0.030256 0.0916626 730
-exper2      -0.001042  0.0005904  -1.764 7.809e-02 -0.002201 0.0001174 730
-
-Multiple R-squared:  0.2432 ,   Adjusted R-squared:  0.2401 
-F-statistic: 25.21 on 3 and 730 DF,  p-value: 1.577e-15
-
-Diagnostics:
-                 numdf dendf  value  p.value    
-Weak instruments     2   729 34.692 4.05e-15 ***
-Wu-Hausman           1   729  0.487    0.485    
-Overidentifying      1    NA  0.484    0.487    
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>ivreg3 <span class="ot">&lt;-</span> <span class="fu">iv_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span> exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8, <span class="at">se_type =</span> <span class="st">"HC1"</span>, <span class="at">diagnostics =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg3)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; iv_robust(formula = lincome ~ yeduc + exper + exper2 | exper + </span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     exper2 + payeduc + sibs, data = income8, se_type = "HC1", </span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     diagnostics = TRUE)</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  HC1 </span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)  CI Lower  CI Upper  DF</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.524145  0.3252807  13.908 3.510e-39  3.885548 5.1627420 730</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; yeduc        0.069909  0.0218722   3.196 1.452e-03  0.026969 0.1128492 730</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper        0.060959  0.0156393   3.898 1.060e-04  0.030256 0.0916626 730</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2      -0.001042  0.0005904  -1.764 7.809e-02 -0.002201 0.0001174 730</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.2432 ,    Adjusted R-squared:  0.2401 </span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 25.21 on 3 and 730 DF,  p-value: 1.577e-15</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Diagnostics:</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  numdf dendf  value  p.value    </span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Weak instruments     2   729 34.692 4.05e-15 ***</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Wu-Hausman           1   729  0.487    0.485    </span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Overidentifying      1    NA  0.484    0.487    </span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><code>summary(ivreg3)</code> の結果を確認すると、<code>Standard error type: HC1</code> と表示されており、ロバスト標準誤差が使用されていることがわかります。 また、<code>yeduc</code> の係数（Estimate）は約 0.0699 であり、標準誤差（Std. Error）は約 0.0219 となっています。これは、先ほど <code>ivreg</code> と <code>vcovHC</code> を組み合わせて計算した結果と一致しています。</p>
 <p>さらに、<code>Diagnostics</code> セクションには、弱操作変数検定（Weak instruments）、Wu-Hausman検定、過剰識別検定（Overidentifying）の結果も表示されています。これらも <code>ivreg</code> で <code>diagnostics = TRUE</code> を指定した際の結果と整合的ですが、ここではロバスト標準誤差を考慮した上で計算されている点に注意が必要です（ただし、この例では診断統計量の値も大きくは変わっていません）。</p>
 <p><code>estimatr</code> パッケージを使うと、このように簡潔なコードでロバスト標準誤差と診断統計量を同時に得ることができるため、実務的にも非常に便利です。</p>
 <p>なお、<code>se_type = "classical"</code> を指定することで、通常の標準誤差を計算することができます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ivreg4 <span class="ot">&lt;-</span> <span class="fu">iv_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span> exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8, <span class="at">se_type =</span> <span class="st">"classical"</span>, <span class="at">diagnostics =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-iv_robust(formula = lincome ~ yeduc + exper + exper2 | exper + 
-    exper2 + payeduc + sibs, data = income8, se_type = "classical", 
-    diagnostics = TRUE)
-
-Standard error type:  classical 
-
-Coefficients:
-             Estimate Std. Error t value  Pr(&gt;|t|) CI Lower  CI Upper  DF
-(Intercept)  4.524145  0.3286803  13.765 1.712e-38  3.87887 5.1694162 730
-yeduc        0.069909  0.0217875   3.209 1.392e-03  0.02714 0.1126830 730
-exper        0.060959  0.0160773   3.792 1.620e-04  0.02940 0.0925226 730
-exper2      -0.001042  0.0006104  -1.707 8.829e-02 -0.00224 0.0001565 730
-
-Multiple R-squared:  0.2432 ,   Adjusted R-squared:  0.2401 
-F-statistic: 23.09 on 3 and 730 DF,  p-value: 2.753e-14
-
-Diagnostics:
-                 numdf dendf  value  p.value    
-Weak instruments     2   729 32.831 2.23e-14 ***
-Wu-Hausman           1   729  0.474    0.491    
-Overidentifying      1    NA  0.403    0.525    
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ivreg4 <span class="ot">&lt;-</span> <span class="fu">iv_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span> exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8, <span class="at">se_type =</span> <span class="st">"classical"</span>, <span class="at">diagnostics =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg4)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; iv_robust(formula = lincome ~ yeduc + exper + exper2 | exper + </span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     exper2 + payeduc + sibs, data = income8, se_type = "classical", </span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     diagnostics = TRUE)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  classical </span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|) CI Lower  CI Upper  DF</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.524145  0.3286803  13.765 1.712e-38  3.87887 5.1694162 730</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; yeduc        0.069909  0.0217875   3.209 1.392e-03  0.02714 0.1126830 730</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper        0.060959  0.0160773   3.792 1.620e-04  0.02940 0.0925226 730</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2      -0.001042  0.0006104  -1.707 8.829e-02 -0.00224 0.0001565 730</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.2432 ,    Adjusted R-squared:  0.2401 </span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 23.09 on 3 and 730 DF,  p-value: 2.753e-14</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Diagnostics:</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  numdf dendf  value  p.value    </span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Weak instruments     2   729 32.831 2.23e-14 ***</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Wu-Hausman           1   729  0.474    0.491    </span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Overidentifying      1    NA  0.403    0.525    </span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
+<p>この結果は、<code>ivreg</code> 関数で <code>diagnostics = TRUE</code> を指定した場合（ロバスト標準誤差を使わない場合）の結果と一致します。</p>
 </section>
 
 </main>
