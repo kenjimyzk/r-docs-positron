@@ -80,6 +80,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul class="collapse">
   <li><a href="#操作変数法instrumental-variables-method" id="toc-操作変数法instrumental-variables-method" class="nav-link active" data-scroll-target="#操作変数法instrumental-variables-method"><span class="header-section-number">1</span> 操作変数法（Instrumental Variables Method）</a></li>
+  <li><a href="#複数の操作変数過剰識別" id="toc-複数の操作変数過剰識別" class="nav-link" data-scroll-target="#複数の操作変数過剰識別"><span class="header-section-number">2</span> 複数の操作変数（過剰識別）</a></li>
   </ul>
 <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="03iv.docx"><i class="bi bi-file-word"></i>MS Word</a></li><li><a href="03iv.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
 </div>
@@ -162,46 +163,12 @@ F-statistic: 80.53 on 3 and 730 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>操作変数が満たすべき条件は以下の2つです： 1. <strong>関連性（Relevance）</strong>: 操作変数（<code>payeduc</code>）は内生変数（<code>yeduc</code>）と相関していること。 2. <strong>外生性（Exogeneity）</strong>: 操作変数（<code>payeduc</code>）は誤差項とは相関していないこと（賃金に対して、教育年数を通じた経路以外で直接的な影響を持たないこと）。</p>
 <p>Rで操作変数法を行うには、<code>AER</code> パッケージの <code>ivreg()</code> 関数が便利です。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># パッケージの読み込み（インストールされていない場合はインストール）</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(AER)) {</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"AER"</span>, <span class="at">repos =</span> <span class="st">"http://cran.us.r-project.org"</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">require</span>(AER)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code> 要求されたパッケージ AER をロード中です </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code> 要求されたパッケージ car をロード中です </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code> 要求されたパッケージ carData をロード中です </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code> 要求されたパッケージ lmtest をロード中です </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code> 要求されたパッケージ zoo をロード中です </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
- 次のパッケージを付け加えます: 'zoo' </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code> 以下のオブジェクトは 'package:base' からマスクされています:
-
-    as.Date, as.Date.numeric</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code> 要求されたパッケージ sandwich をロード中です </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code> 要求されたパッケージ survival をロード中です </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 操作変数法による推定</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 式の書き方: 従属変数 ~ 内生変数 + 外生変数 | 操作変数 + 外生変数</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>ivreg1 <span class="ot">&lt;-</span> <span class="fu">ivreg</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span> </span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                  exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc, <span class="at">data =</span> income8)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AER)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 操作変数法による推定</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 式の書き方: 従属変数 ~ 内生変数 + 外生変数 | 操作変数 + 外生変数</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ivreg1 <span class="ot">&lt;-</span> <span class="fu">ivreg</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc, <span class="at">data =</span> income8)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -230,8 +197,97 @@ Wald test: 23.22 on 3 and 730 DF,  p-value: 2.31e-14 </code></pre>
 </section>
 <section id="結果の解釈" class="level3" data-number="1.4">
 <h3 data-number="1.4" class="anchored" data-anchor-id="結果の解釈"><span class="header-section-number">1.4</span> 結果の解釈</h3>
-<p>OLSの結果（<code>reg1</code>）とIV法の結果（<code>ivreg1</code>）を比較してみましょう。 一般的に、能力バイアスが存在する場合、OLS推定値は上方バイアスを持つ（真の値より大きくなる）と考えられます。もしIV推定値がOLS推定値よりも小さくなっていれば、バイアスの方向と整合的です。逆に、IV推定値の方が大きくなる場合、測定誤差などの別の要因や、操作変数の妥当性について検討する必要があるかもしれません。</p>
-<p>この結果を見て、教育年数の収益率がどのように変化したかを確認してください。</p>
+<p>OLSの結果（<code>reg1</code>）とIV法の結果（<code>ivreg1</code>）を比較してみましょう。</p>
+<ul>
+<li><strong>OLS推定値（<code>yeduc</code>）</strong>: 約 0.084</li>
+<li><strong>IV推定値（<code>yeduc</code>）</strong>: 約 0.075</li>
+</ul>
+<p>OLSによる教育年数の収益率（約8.4%）と比較して、操作変数法による推定値（約7.5%）は小さくなりました。 これは、OLS推定値が「能力」などの観察されない要因によって上方バイアスを持っていた（過大評価されていた）という仮説と整合的です。能力が高い人は教育年数が長く、かつ賃金も高い傾向があるため、能力をコントロールできないOLSでは教育の効果が実際よりも大きく推定されてしまう傾向があります。操作変数法を用いることで、このバイアスを取り除き、より純粋な教育の効果に近づくことができました。</p>
+<p>ただし、IV推定値も依然として統計的に有意であり、教育が賃金に正の効果を与えるという結論自体は変わりません。</p>
+</section>
+</section>
+<section id="複数の操作変数過剰識別" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="複数の操作変数過剰識別"><span class="header-section-number">2</span> 複数の操作変数（過剰識別）</h2>
+<p>次に、操作変数を追加して分析を行います。ここでは、<code>payeduc</code>（親の教育費支払い能力）に加えて、<code>sibs</code>（兄弟姉妹数）も操作変数として使用します。兄弟姉妹数が多いと、一人当たりの教育資源が減少し、教育年数に影響を与える可能性がありますが、本人の賃金には直接影響しない（外生性がある）と仮定します。</p>
+<section id="ivregによる推定" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="ivregによる推定"><span class="header-section-number">2.1</span> ivregによる推定</h3>
+<p><code>ivreg()</code>関数の <code>|</code> の右側に <code>sibs</code> を追加します。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 兄弟姉妹数（sibs）も操作変数として追加</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ivreg2 <span class="ot">&lt;-</span> <span class="fu">ivreg</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+ivreg(formula = lincome ~ yeduc + exper + exper2 | exper + exper2 + 
+    payeduc + sibs, data = income8)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-1.340720 -0.153748 -0.009586  0.163970  1.224695 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  4.5241448  0.3286803  13.765  &lt; 2e-16 ***
+yeduc        0.0699093  0.0217875   3.209 0.001392 ** 
+exper        0.0609592  0.0160773   3.792 0.000162 ***
+exper2      -0.0010417  0.0006104  -1.707 0.088290 .  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.3103 on 730 degrees of freedom
+Multiple R-Squared: 0.2432, Adjusted R-squared: 0.2401 
+Wald test: 23.09 on 3 and 730 DF,  p-value: 2.753e-14 </code></pre>
+</div>
+</div>
+</section>
+<section id="段階最小二乗法2slsの手動計算" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="段階最小二乗法2slsの手動計算"><span class="header-section-number">2.2</span> 2段階最小二乗法（2SLS）の手動計算</h3>
+<p>操作変数法は「2段階最小二乗法（2SLS）」とも呼ばれます。この仕組みを理解するために、<code>lm()</code>関数を使って手動で計算してみましょう。</p>
+<ol type="1">
+<li><strong>第1段階</strong>: 内生変数（<code>yeduc</code>）を、すべての外生変数（<code>exper</code>, <code>exper2</code>, <code>payeduc</code>, <code>sibs</code>）に回帰させ、予測値（<code>fitted values</code>）を求めます。</li>
+<li><strong>第2段階</strong>: 本来の回帰式の内生変数（<code>yeduc</code>）を、第1段階で求めた予測値に置き換えて回帰を行います。</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 第1段階：内生変数（yeduc）をすべての外生変数に回帰</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ols1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(yeduc <span class="sc">~</span> exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 第2段階：yeducの予測値（fitted(ols1)）を使って本回帰</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>ols2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(lincome <span class="sc">~</span> <span class="fu">fitted</span>(ols1) <span class="sc">+</span> exper <span class="sc">+</span> exper2, <span class="at">data =</span> income8)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ols2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = lincome ~ fitted(ols1) + exper + exper2, data = income8)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.1985 -0.2114  0.0001  0.1888  1.1450 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   4.524145   0.364011  12.429  &lt; 2e-16 ***
+fitted(ols1)  0.069909   0.024130   2.897 0.003877 ** 
+exper         0.060959   0.017805   3.424 0.000652 ***
+exper2       -0.001042   0.000676  -1.541 0.123722    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.3437 on 730 degrees of freedom
+Multiple R-squared:  0.0718,    Adjusted R-squared:  0.06799 
+F-statistic: 18.82 on 3 and 730 DF,  p-value: 9.08e-12</code></pre>
+</div>
+</div>
+<p>手動計算による <code>fitted(ols1)</code> の係数は、<code>ivreg2</code> の <code>yeduc</code> の係数と一致することを確認してください（標準誤差は計算方法の違いにより若干異なる場合があります）。これにより、操作変数法が「内生変数のうち、外生変数によって説明できる部分（予測値）」のみを使って回帰を行っていることがわかります。</p>
+</section>
+<section id="結果の解釈-1" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="結果の解釈-1"><span class="header-section-number">2.3</span> 結果の解釈</h3>
+<p>複数の操作変数を用いた結果（<code>ivreg2</code>）を確認しましょう。</p>
+<ul>
+<li><strong>IV推定値（<code>yeduc</code>）</strong>: 約 0.070</li>
+</ul>
+<p>単一の操作変数を用いた場合（約0.075）と比較して、推定値はさらに少し小さくなりましたが、大きな違いはありません。また、統計的有意性も維持されています（p値 &lt; 0.01）。 複数の操作変数を用いることで、推定の効率性が向上する可能性がありますが、同時に過剰識別検定（Sargan検定など）を行うことで操作変数の妥当性をチェックすることも可能になります（ここでは省略）。 兄弟姉妹数を操作変数に追加しても、教育の収益率が約7%程度であるという結論は頑健であることが示唆されます。</p>
 </section>
 </section>
 
