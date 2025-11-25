@@ -81,6 +81,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#操作変数法instrumental-variables-method" id="toc-操作変数法instrumental-variables-method" class="nav-link active" data-scroll-target="#操作変数法instrumental-variables-method"><span class="header-section-number">1</span> 操作変数法（Instrumental Variables Method）</a></li>
   <li><a href="#複数の操作変数過剰識別" id="toc-複数の操作変数過剰識別" class="nav-link" data-scroll-target="#複数の操作変数過剰識別"><span class="header-section-number">2</span> 複数の操作変数（過剰識別）</a></li>
+  <li><a href="#ivregの拡張機能" id="toc-ivregの拡張機能" class="nav-link" data-scroll-target="#ivregの拡張機能"><span class="header-section-number">3</span> ivregの拡張機能</a></li>
+  <li><a href="#estimatrパッケージ" id="toc-estimatrパッケージ" class="nav-link" data-scroll-target="#estimatrパッケージ"><span class="header-section-number">4</span> estimatrパッケージ</a></li>
   </ul>
 <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="03iv.docx"><i class="bi bi-file-word"></i>MS Word</a></li><li><a href="03iv.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
 </div>
@@ -279,7 +281,7 @@ Multiple R-squared:  0.0718,    Adjusted R-squared:  0.06799
 F-statistic: 18.82 on 3 and 730 DF,  p-value: 9.08e-12</code></pre>
 </div>
 </div>
-<p>手動計算による <code>fitted(ols1)</code> の係数は、<code>ivreg2</code> の <code>yeduc</code> の係数と一致することを確認してください（標準誤差は計算方法の違いにより若干異なる場合があります）。これにより、操作変数法が「内生変数のうち、外生変数によって説明できる部分（予測値）」のみを使って回帰を行っていることがわかります。</p>
+<p>手動計算による <code>fitted(ols1)</code> の係数は、<code>ivreg2</code> の <code>yeduc</code> の係数と一致することを確認してください。これにより、操作変数法が <strong>内生変数のうち、外生変数によって説明できる部分（予測値）</strong> のみを使って回帰を行っていることがわかります。ただし、標準誤差は異なっているために検定に使えません。</p>
 </section>
 <section id="結果の解釈-1" class="level3" data-number="2.3">
 <h3 data-number="2.3" class="anchored" data-anchor-id="結果の解釈-1"><span class="header-section-number">2.3</span> 結果の解釈</h3>
@@ -289,6 +291,157 @@ F-statistic: 18.82 on 3 and 730 DF,  p-value: 9.08e-12</code></pre>
 </ul>
 <p>単一の操作変数を用いた場合（約0.075）と比較して、推定値はさらに少し小さくなりましたが、大きな違いはありません。また、統計的有意性も維持されています（p値 &lt; 0.01）。 複数の操作変数を用いることで、推定の効率性が向上する可能性がありますが、同時に過剰識別検定（Sargan検定など）を行うことで操作変数の妥当性をチェックすることも可能になります（ここでは省略）。 兄弟姉妹数を操作変数に追加しても、教育の収益率が約7%程度であるという結論は頑健であることが示唆されます。</p>
 </section>
+</section>
+<section id="ivregの拡張機能" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="ivregの拡張機能"><span class="header-section-number">3</span> ivregの拡張機能</h2>
+<p><code>ivreg</code>関数には、多くの拡張機能があります。</p>
+<section id="診断統計量" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="診断統計量"><span class="header-section-number">3.1</span> 診断統計量</h3>
+<p><code>summary()</code> 関数に <code>diagnostics = TRUE</code> オプションを指定することで、操作変数の妥当性を評価するための診断統計量を確認できます。これには、<strong>弱操作変数検定</strong> （Weak Instrument Test）や、<strong>Wu-Hausman</strong>（ハウスマン検定）や、<strong>過剰識別検定</strong> （Sargan Test）などが含まれます。弱操作変数検定は、操作変数が内生変数と十分に相関しているか（関連性条件）を評価し、過剰識別検定は、複数の操作変数がある場合に、それらがすべて外生性条件を満たしているか（誤差項と相関がないか）を評価します。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg2, <span class="at">diagnostics =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+ivreg(formula = lincome ~ yeduc + exper + exper2 | exper + exper2 + 
+    payeduc + sibs, data = income8)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-1.340720 -0.153748 -0.009586  0.163970  1.224695 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  4.5241448  0.3286803  13.765  &lt; 2e-16 ***
+yeduc        0.0699093  0.0217875   3.209 0.001392 ** 
+exper        0.0609592  0.0160773   3.792 0.000162 ***
+exper2      -0.0010417  0.0006104  -1.707 0.088290 .  
+
+Diagnostic tests:
+                 df1 df2 statistic  p-value    
+Weak instruments   2 729    32.831 2.23e-14 ***
+Wu-Hausman         1 729     0.474    0.491    
+Sargan             1  NA     0.403    0.525    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.3103 on 730 degrees of freedom
+Multiple R-Squared: 0.2432, Adjusted R-squared: 0.2401 
+Wald test: 23.09 on 3 and 730 DF,  p-value: 2.753e-14 </code></pre>
+</div>
+</div>
+<p>診断結果の解釈は以下の通りです。</p>
+<ul>
+<li><strong>Weak instruments（弱操作変数検定）</strong>: p値が非常に小さく（&lt; 0.01）、帰無仮説（操作変数が弱い）は棄却されます。したがって、操作変数は内生変数と十分に強い相関を持っていると言えます。</li>
+<li><strong>Wu-Hausman（ハウスマン検定）</strong>: p値は約0.491であり、帰無仮説（OLSとIVの推定値に差がない＝内生性がない）を棄却できません。これは、統計的にはOLS推定値とIV推定値に有意な差が見られないことを示唆しています（ただし、理論的に内生性が疑われる場合はIV法を用いることが推奨されることもあります）。</li>
+<li><strong>Sargan（過剰識別検定）</strong>: p値は約0.525であり、帰無仮説（すべての操作変数が外生である）を棄却できません。これは、使用した操作変数（<code>payeduc</code> と <code>sibs</code>）が外生性条件を満たしているという仮定と矛盾しないことを示しています。</li>
+</ul>
+<p>なお過剰識別検定は操作変数の数が内生変数の数より厳密に多くなければ計算されません。</p>
+</section>
+<section id="ロバスト標準誤差" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="ロバスト標準誤差"><span class="header-section-number">3.2</span> ロバスト標準誤差</h3>
+<p>回帰分析において、誤差項の分散が均一でない <strong>不均一分散</strong> （heteroskedasticity）が存在する場合、通常の標準誤差は過小評価される傾向があり、統計的推論が誤る可能性があります。このような場合、<code>summary()</code> 関数に <code>vcov</code> オプションを指定し、<code>vcovHC()</code> 関数（<code>sandwich</code> パッケージ由来）を用いて <strong>ロバスト標準誤差</strong> （robust standard errors）を計算することで、不均一分散に頑健な標準誤差を得ることができます。<code>type = "HC1"</code> は、ロバスト標準誤差の計算方法の一つを指定しています。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg2, <span class="at">vcov =</span> <span class="fu">vcovHC</span>(ivreg2, <span class="at">type =</span> <span class="st">"HC1"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+ivreg(formula = lincome ~ yeduc + exper + exper2 | exper + exper2 + 
+    payeduc + sibs, data = income8)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-1.340720 -0.153748 -0.009586  0.163970  1.224695 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  4.5241448  0.3252807  13.908  &lt; 2e-16 ***
+yeduc        0.0699093  0.0218722   3.196 0.001452 ** 
+exper        0.0609592  0.0156393   3.898 0.000106 ***
+exper2      -0.0010417  0.0005904  -1.764 0.078095 .  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.3103 on 730 degrees of freedom
+Multiple R-Squared: 0.2432, Adjusted R-squared: 0.2401 
+Wald test: 25.21 on 3 and 730 DF,  p-value: 1.577e-15 </code></pre>
+</div>
+</div>
+<p>ロバスト標準誤差を用いた場合でも、<code>yeduc</code> の係数は有意（p &lt; 0.01）であり、教育の効果が統計的に確からしいことが支持されます。通常の標準誤差と比較して、標準誤差の値がどのように変化しているかを確認することも重要です（ここでは大きな変化は見られません）。</p>
+<p>なお、<code>diagnostics = TRUE</code> を同時に指定することで、診断統計量を含めて確認できますが、その場合、通常の標準誤差の結果となることに注意されたい。</p>
+</section>
+</section>
+<section id="estimatrパッケージ" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="estimatrパッケージ"><span class="header-section-number">4</span> estimatrパッケージ</h2>
+<p><code>estimatr</code>パッケージは、<code>ivreg</code>関数を用いて操作変数法を実行する際に、より簡単に診断統計量を確認することができます。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ivreg3 <span class="ot">&lt;-</span> <span class="fu">iv_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span> exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8, <span class="at">se_type =</span> <span class="st">"HC1"</span>, <span class="at">diagnostics =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+iv_robust(formula = lincome ~ yeduc + exper + exper2 | exper + 
+    exper2 + payeduc + sibs, data = income8, se_type = "HC1", 
+    diagnostics = TRUE)
+
+Standard error type:  HC1 
+
+Coefficients:
+             Estimate Std. Error t value  Pr(&gt;|t|)  CI Lower  CI Upper  DF
+(Intercept)  4.524145  0.3252807  13.908 3.510e-39  3.885548 5.1627420 730
+yeduc        0.069909  0.0218722   3.196 1.452e-03  0.026969 0.1128492 730
+exper        0.060959  0.0156393   3.898 1.060e-04  0.030256 0.0916626 730
+exper2      -0.001042  0.0005904  -1.764 7.809e-02 -0.002201 0.0001174 730
+
+Multiple R-squared:  0.2432 ,   Adjusted R-squared:  0.2401 
+F-statistic: 25.21 on 3 and 730 DF,  p-value: 1.577e-15
+
+Diagnostics:
+                 numdf dendf  value  p.value    
+Weak instruments     2   729 34.692 4.05e-15 ***
+Wu-Hausman           1   729  0.487    0.485    
+Overidentifying      1    NA  0.484    0.487    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p><code>summary(ivreg3)</code> の結果を確認すると、<code>Standard error type: HC1</code> と表示されており、ロバスト標準誤差が使用されていることがわかります。 また、<code>yeduc</code> の係数（Estimate）は約 0.0699 であり、標準誤差（Std. Error）は約 0.0219 となっています。これは、先ほど <code>ivreg</code> と <code>vcovHC</code> を組み合わせて計算した結果と一致しています。</p>
+<p>さらに、<code>Diagnostics</code> セクションには、弱操作変数検定（Weak instruments）、Wu-Hausman検定、過剰識別検定（Overidentifying）の結果も表示されています。これらも <code>ivreg</code> で <code>diagnostics = TRUE</code> を指定した際の結果と整合的ですが、ここではロバスト標準誤差を考慮した上で計算されている点に注意が必要です（ただし、この例では診断統計量の値も大きくは変わっていません）。</p>
+<p><code>estimatr</code> パッケージを使うと、このように簡潔なコードでロバスト標準誤差と診断統計量を同時に得ることができるため、実務的にも非常に便利です。</p>
+<p>なお、<code>se_type = "classical"</code> を指定することで、通常の標準誤差を計算することができます。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ivreg4 <span class="ot">&lt;-</span> <span class="fu">iv_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span> exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8, <span class="at">se_type =</span> <span class="st">"classical"</span>, <span class="at">diagnostics =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+iv_robust(formula = lincome ~ yeduc + exper + exper2 | exper + 
+    exper2 + payeduc + sibs, data = income8, se_type = "classical", 
+    diagnostics = TRUE)
+
+Standard error type:  classical 
+
+Coefficients:
+             Estimate Std. Error t value  Pr(&gt;|t|) CI Lower  CI Upper  DF
+(Intercept)  4.524145  0.3286803  13.765 1.712e-38  3.87887 5.1694162 730
+yeduc        0.069909  0.0217875   3.209 1.392e-03  0.02714 0.1126830 730
+exper        0.060959  0.0160773   3.792 1.620e-04  0.02940 0.0925226 730
+exper2      -0.001042  0.0006104  -1.707 8.829e-02 -0.00224 0.0001565 730
+
+Multiple R-squared:  0.2432 ,   Adjusted R-squared:  0.2401 
+F-statistic: 23.09 on 3 and 730 DF,  p-value: 2.753e-14
+
+Diagnostics:
+                 numdf dendf  value  p.value    
+Weak instruments     2   729 32.831 2.23e-14 ***
+Wu-Hausman           1   729  0.474    0.491    
+Overidentifying      1    NA  0.403    0.525    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
 </section>
 
 </main>
