@@ -123,6 +123,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5    10    100     9    300 5.703783</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    11    121     9    150 5.010635</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>主な変数は以下の通りです。</p>
+<ul>
+<li><code>lincome</code>: 賃金の対数値</li>
+<li><code>yeduc</code>: 教育年数</li>
+<li><code>exper</code>: 経験年数</li>
+<li><code>exper2</code>: 経験年数の二乗</li>
+</ul>
 </section>
 <section id="重回帰分析-1" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="重回帰分析-1"><span class="header-section-number">1.2</span> 重回帰分析</h3>
@@ -439,7 +446,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>Fstat</span>
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 565.4484</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>手計算で求めたF統計量（<code>fstat</code>）は565.45となり、前の<code>anova()</code>の結果と一致します。このF値は5%水準の臨界値2.99をはるかに超えているため、係数が男女間で等しいという帰無仮説は棄却されます。これは、男女間で賃金と教育の関係に「構造的な違い」があることの強い証拠となります。</p>
+<p>手計算で求めたF統計量（<code>Fstat</code>）は565.45となり、前の<code>anova()</code>の結果と一致します。このF値は5%水準の臨界値2.99をはるかに超えているため、係数が男女間で等しいという帰無仮説は棄却されます。これは、男女間で賃金と教育の関係に「構造的な違い」があることの強い証拠となります。</p>
 </section>
 </section>
 <section id="頑健な標準誤差" class="level2" data-number="3">
@@ -472,6 +479,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><code>coeftest</code>の出力は、頑健な標準誤差（HC1）を用いて再計算した係数検定の結果です。係数の推定値自体はOLSと変わりませんが、標準誤差が変化しています（例: <code>yeduc</code>の標準誤差が0.00706から0.00640に減少）。この例では、標準誤差の変化は小さく、各変数の統計的有意性に関する結論は変わりませんでした。</p>
+<p>なお、<code>vcovHC()</code> 関数を用いて分散共分散行列を計算する際に、<code>type</code> オプションを指定することで、異なる種類のロバスト標準誤差を計算することができます。例えば、<code>type = "HC2"</code> は、HC1よりも一般的な推奨値として使用される種類のロバスト標準誤差を計算します。</p>
 <section id="頑健なf検定wald検定" class="level3" data-number="3.1">
 <h3 data-number="3.1" class="anchored" data-anchor-id="頑健なf検定wald検定"><span class="header-section-number">3.1</span> 頑健なF検定（Wald検定）</h3>
 <p><code>lmtest</code>パッケージの<code>waldtest</code>関数を用いて、頑健な標準誤差に基づいたF検定（Wald検定）を実行します。制約モデル<code>reg0</code>と非制約モデル<code>reg1</code>を、頑健な分散共分散行列<code>vcov</code>を用いて比較します。</p>
@@ -521,7 +529,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.2066 ,    Adjusted R-squared:  0.206 </span></span>
 <span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 365.1 on 3 and 4295 DF,  p-value: &lt; 2.2e-16</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p><code>lm_robust()</code>の出力結果は、標準誤差やt値が<code>coeftest</code>と<code>vcovHC</code>を組み合わせた結果と一致していることを示しています。これにより、<code>lm_robust()</code>が同様の頑健な推定をより直接的に行う便利な方法であることがわかります。</p>
+<p><code>lm_robust()</code>の出力結果は、標準誤差やt値が<code>coeftest</code>と<code>vcovHC</code>を組み合わせた結果（ただし<code>se_type</code>による違いはある）と一致していることを示しています。これにより、<code>lm_robust()</code>が同様の頑健な推定をより直接的に行う便利な方法であることがわかります。</p>
 </section>
 <section id="通常の標準誤差との比較" class="level3" data-number="4.2">
 <h3 data-number="4.2" class="anchored" data-anchor-id="通常の標準誤差との比較"><span class="header-section-number">4.2</span> 通常の標準誤差との比較</h3>
