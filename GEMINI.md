@@ -21,6 +21,10 @@
 1.  **03iv.qmd (Chapter 8) の作成**:
     - `8_example_8_2.R` と `8_income.csv` を元に作成。
     - HTML出力結果に基づき、OLSとIVの推定値比較（能力バイアスの解釈）を追記完了。
+    - 複数の操作変数（過剰識別）のセクションを追加し、結果の解釈を追記。
+    - 診断統計量（弱操作変数検定、Wu-Hausman検定、Sargan検定）の解説と解釈を追加。
+    - ロバスト標準誤差の計算と解釈を追加。
+    - `estimatr` パッケージを用いた推定と診断統計量の確認方法を追加。
 2.  **Chapter 7 (AI and Databot) の更新**:
     - Positron AssistantとDatabotに関する内容 (`chapter7_ai_and_databot.qmd`)。
     - 現状、このファイルはルートディレクトリに存在しません。
@@ -30,6 +34,7 @@
     - Positron IDEの紹介記事作成。
 
 ## 次のステップ
+- `03iv.qmd` の最終確認（`se_type = "classical"` の記述など）。
 - `chapter7_ai_and_databot.qmd` の作成または復元。
 - `7_1_income.csv` を使用した解析内容の統合。
 - 各チャプターの図表更新の完了確認。
