@@ -218,7 +218,8 @@ window.Quarto = {
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 664.0608</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>結果は速度の分散が約27.96、制動距離の分散が約664で、距離の方が桁違いにばらつくことが分かります（単位の違いも影響しています）。</p>
-<p>データを<span class="math inline">\(\{x_i\}_{i=1}^n\)</span>としたとき、分散 <span class="math inline">\(s_x^2\)</span> は <span class="math display">\[　s_x^2 = \frac{1}{n-1}\sum_{i=1}^n(x_i-\bar{x})^2
+<p>データを<span class="math inline">\(\{x_i\}_{i=1}^n\)</span>としたとき、分散 <span class="math inline">\(s_x^2\)</span> は <span class="math display">\[
+s_x^2 = \frac{1}{n-1}\sum_{i=1}^n(x_i-\bar{x})^2
 \]</span> で定義されます。分散公式より、以下が成り立ちます。 <span class="math display">\[
 \frac{n-1}{n}s_x^2=\frac{1}{n}\sum_{i=1}^nx_i^2 - \bar{x}^2
 \]</span></p>
@@ -252,7 +253,8 @@ window.Quarto = {
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 109.9469</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>数値は 109.95 と正で、速度が高い観測ほど制動距離も長くなる傾向があることを示します。</p>
-<p>データを<span class="math inline">\(\{x_i,y_i\}_{i=1}^n\)</span>としたとき、共分散 <span class="math inline">\(s_{xy}\)</span> は <span class="math display">\[　s_{xy} = \frac{1}{n-1}\sum_{i=1}^n(x_i-\bar{x})(y_i-\bar{y})
+<p>データを<span class="math inline">\(\{x_i,y_i\}_{i=1}^n\)</span>としたとき、共分散 <span class="math inline">\(s_{xy}\)</span> は <span class="math display">\[
+s_{xy} = \frac{1}{n-1}\sum_{i=1}^n(x_i-\bar{x})(y_i-\bar{y})
 \]</span> で定義されます。共分散公式より、以下が成り立ちます。 <span class="math display">\[
 \frac{n-1}{n}s_{xy}=\frac{1}{n}\sum_{i=1}^nx_i y_i - \bar{x}\bar{y}
 \]</span></p>
@@ -302,7 +304,8 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 <p>ヒストグラムから、速度は12〜20mile/h付近に集中しつつ25mile/h付近まで裾が伸びるやや右裾の分布であることが視覚的に分かります。</p>
 <p>ビンの数や色、タイトルなどを指定してヒストグラムの見た目を調整します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(cars<span class="sc">$</span>speed, <span class="at">breaks =</span> <span class="dv">10</span>, <span class="at">col =</span> <span class="st">"lightblue"</span>, <span class="at">main =</span> <span class="st">"Histogram of Speed"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(cars<span class="sc">$</span>speed, <span class="at">breaks =</span> <span class="dv">10</span>, <span class="at">col =</span> <span class="st">"lightblue"</span>,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Histogram of Speed"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -338,7 +341,8 @@ r_{xy}=\frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i-\bar{x}}{s_x}\right)\left(\frac{
 <p>こちらも同様に右上がりの雲が得られ、書き方が違っても同じ情報を描けることが分かります。</p>
 <p>タイトルや色、点の形などを指定して散布図をさらに見やすく調整します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist<span class="sc">~</span>speed, <span class="at">data =</span> cars, <span class="at">main =</span> <span class="st">"Distance vs Speed"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>, <span class="at">ylab =</span> <span class="st">"Distance"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist<span class="sc">~</span>speed, <span class="at">data =</span> cars, <span class="at">main =</span> <span class="st">"Distance vs Speed"</span>, </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Speed"</span>, <span class="at">ylab =</span> <span class="st">"Distance"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -400,8 +404,10 @@ R^2=1-\frac{\sum\hat{u}_i^2}{\sum(y_i-\bar{y})^2}
 <p>いずれの式でも 0.651 と算出され、速度だけで距離の変動の約65%を説明できるモデルであることが分かります。</p>
 <p><code>abline()</code>関数を使って、散布図に回帰直線を重ねて描画します。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist <span class="sc">~</span> speed, <span class="at">data =</span> cars, <span class="at">main =</span> <span class="st">"Distance vs Speed with Regression Line"</span>, <span class="at">xlab =</span> <span class="st">"Speed"</span>, <span class="at">ylab =</span> <span class="st">"Distance"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(model, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dist <span class="sc">~</span> speed, <span class="at">data =</span> cars, </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Distance vs Speed with Regression Line"</span>, </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Speed"</span>, <span class="at">ylab =</span> <span class="st">"Distance"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">"blue"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(model, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -428,6 +434,7 @@ R^2=1-\frac{\sum\hat{u}_i^2}{\sum(y_i-\bar{y})^2}
 <span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6    11    121     9    150 5.010635</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>汎用テキストやカスタム区切りのファイルには <code>read.table()</code> を使いますが、高速で堅牢な読み込みが必要な場合は <code>read.csv()</code> の利用を推奨します。 より高速な読み込みが必要な場合は、<code>readr</code>パッケージの<code>read_csv()</code>も選択肢です。<code>read_csv()</code>は高速で、自動的にtibble形式で返し、列の型推定も柔軟です。</p>
+<p>次章では、このデータセットを用いて重回帰分析を行います。</p>
 </section>
 
 </main>

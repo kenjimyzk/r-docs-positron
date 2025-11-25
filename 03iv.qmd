@@ -69,7 +69,7 @@ library(AER)
 # 操作変数法による推定
 # 式の書き方: 従属変数 ~ 内生変数 + 外生変数 | 操作変数 + 外生変数
 ivreg1 <- ivreg(lincome ~ yeduc + exper + exper2 |
-    exper + exper2 + payeduc, data = income8)
+                  exper + exper2 + payeduc, data = income8)
 summary(ivreg1)
 ```
 
@@ -98,7 +98,7 @@ OLSによる教育年数の収益率（約8.4%）と比較して、操作変数�
 ```{r}
 # 兄弟姉妹数（sibs）も操作変数として追加
 ivreg2 <- ivreg(lincome ~ yeduc + exper + exper2 |
-    exper + exper2 + payeduc + sibs, data = income8)
+                  exper + exper2 + payeduc + sibs, data = income8)
 summary(ivreg2)
 ```
 
@@ -173,7 +173,9 @@ summary(ivreg2, vcov = vcov)
 
 ```{r}
 library(estimatr)
-ivreg3 <- iv_robust(lincome ~ yeduc + exper + exper2 | exper + exper2 + payeduc + sibs, data = income8, se_type = "HC1", diagnostics = TRUE)
+ivreg3 <- iv_robust(lincome ~ yeduc + exper + exper2 |
+                      exper + exper2 + payeduc + sibs, data = income8,
+                    se_type = "HC1", diagnostics = TRUE)
 summary(ivreg3)
 ```
 
@@ -187,7 +189,9 @@ summary(ivreg3)
 なお、`se_type = "classical"` を指定することで、通常の標準誤差を計算することができます。
 ```{r}
 library(estimatr)
-ivreg4 <- iv_robust(lincome ~ yeduc + exper + exper2 | exper + exper2 + payeduc + sibs, data = income8, se_type = "classical", diagnostics = TRUE)
+ivreg4 <- iv_robust(lincome ~ yeduc + exper + exper2 | 
+                      exper + exper2 + payeduc + sibs, data = income8, 
+                    se_type = "classical", diagnostics = TRUE)
 summary(ivreg4)
 ```
 
