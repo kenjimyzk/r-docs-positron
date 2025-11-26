@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.552">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>R使い方入門：パネルデータ分析と差の差法（DID）の実践</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="03panel_files/libs/clipboard/clipboard.min.js"></script>
+<script src="03panel_files/libs/quarto-html/quarto.js"></script>
+<script src="03panel_files/libs/quarto-html/popper.min.js"></script>
+<script src="03panel_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="03panel_files/libs/quarto-html/anchor.min.js"></script>
+<link href="03panel_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="03panel_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="03panel_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="03panel_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="03panel_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#データの読み込みと概要" id="toc-データの読み込みと概要" class="nav-link active" data-scroll-target="#データの読み込みと概要"><span class="header-section-number">1</span> データの読み込みと概要</a></li>
+  <li><a href="#差の差法didの考え方" id="toc-差の差法didの考え方" class="nav-link" data-scroll-target="#差の差法didの考え方"><span class="header-section-number">2</span> 差の差法（DID）の考え方</a></li>
+  <li><a href="#plm-パッケージによるパネルデータ分析" id="toc-plm-パッケージによるパネルデータ分析" class="nav-link" data-scroll-target="#plm-パッケージによるパネルデータ分析"><span class="header-section-number">3</span> plm パッケージによるパネルデータ分析</a></li>
+  <li><a href="#教育的ポイント" id="toc-教育的ポイント" class="nav-link" data-scroll-target="#教育的ポイント"><span class="header-section-number">4</span> 教育的ポイント</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="03panel.docx"><i class="bi bi-file-word"></i>MS Word</a></li><li><a href="03panel.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">R使い方入門：パネルデータ分析と差の差法（DID）の実践</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="データの読み込みと概要" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="データの読み込みと概要"><span class="header-section-number">1</span> データの読み込みと概要</h2>
+<p>分析テーマは、<strong>健康ショック（shock）が生活満足度（life）に与える影響</strong>を、パネルデータを用いて検証することです。ここでは<strong>差の差法（Difference-in-Differences: DID）</strong>と呼ばれる手法を用いて、処置（健康ショック）の因果効果を識別します。</p>
+<section id="データの説明" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="データの説明"><span class="header-section-number">1.1</span> データの説明</h3>
+<ul>
+<li><strong>id</strong>: 個人識別番号</li>
+<li><strong>t</strong>: 時点（1 = 処置前、2 = 処置後）</li>
+<li><strong>life</strong>: 生活満足度（0〜4の5段階）</li>
+<li><strong>shock</strong>: 健康ショックを受けたグループかどうか（1 = 処置群、0 = 対照群）</li>
+<li><strong>y2</strong>: 時点ダミー（1 = 2期目、0 = 1期目）</li>
+<li><strong>shock_y2</strong>: 処置群×2期目の交差項（DIDの識別変数）</li>
+<li><strong>income</strong>: 所得（制御変数）</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># データ読み込みと確認</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>life9 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"9_2_life_xt.csv"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(life9)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   id t income life shock y2 shock_y2</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  1 1    300    3     0  0        0</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  1 2    300    1     0  1        0</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  2 1    300    3     1  0        0</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4  2 2    300    4     1  1        1</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5  3 1     50    3     1  0        0</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6  3 2    300    2     1  1        1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>データ構造を確認します。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(life9)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 'data.frame':    6040 obs. of  7 variables:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ id      : int  1 1 2 2 3 3 4 4 5 5 ...</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ t       : int  1 2 1 2 1 2 1 2 1 2 ...</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ income  : num  300 300 300 300 50 300 400 400 200 200 ...</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ life    : int  3 1 3 4 3 2 3 3 3 3 ...</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ shock   : int  0 0 1 1 1 1 1 1 0 0 ...</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ y2      : int  0 1 0 1 0 1 0 1 0 1 ...</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  $ shock_y2: int  0 0 0 1 0 1 0 1 0 0 ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>サンプルサイズを確認します。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 個人数と観測数</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>n_individuals <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(life9<span class="sc">$</span>id))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>n_obs <span class="ot">&lt;-</span> <span class="fu">nrow</span>(life9)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"個人数:"</span>, n_individuals, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 個人数: 3020</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"総観測数:"</span>, n_obs, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 総観測数: 6040</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"1人あたり観測数:"</span>, n_obs <span class="sc">/</span> n_individuals, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1人あたり観測数: 2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="差の差法didの考え方" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="差の差法didの考え方"><span class="header-section-number">2</span> 差の差法（DID）の考え方</h2>
+<section id="didとは何か" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="didとは何か"><span class="header-section-number">2.1</span> DIDとは何か？</h3>
+<p>差の差法（Difference-in-Differences）は、<strong>処置群と対照群の変化の差</strong>を比較することで、処置の因果効果を識別する手法です。</p>
+<p><strong>基本的なアイデア</strong>：</p>
+<ol type="1">
+<li>処置群の変化（2期目 − 1期目）を計算</li>
+<li>対照群の変化（2期目 − 1期目）を計算</li>
+<li>両者の差を取る → これがDID推定量</li>
+</ol>
+<p><strong>なぜ「差の差」なのか？</strong></p>
+<p>単純に処置群と対照群を比較するだけでは、両グループのもともとの違い（セレクションバイアス）を除去できません。また、単純に前後比較するだけでは、時間とともに変化する共通のトレンド（時間効果）を除去できません。</p>
+<p>DIDは「差を取る」ことを2回行うことで、個人固有の効果と時間効果の両方を除去し、処置の純粋な効果を識別します。</p>
+</section>
+<section id="did推定のための回帰モデル" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="did推定のための回帰モデル"><span class="header-section-number">2.2</span> DID推定のための回帰モデル</h3>
+<p>DIDは以下の回帰式で表現できます：</p>
+<p><span class="math display">\[
+life_{it} = \alpha + \beta \cdot shock_i + \gamma \cdot y2_t + \delta \cdot (shock_i \times y2_t) + \varepsilon_{it}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\beta\)</span>：処置群と対照群のベースラインの差</li>
+<li><span class="math inline">\(\gamma\)</span>：時間効果（全員に共通する2期目の変化）</li>
+<li><span class="math inline">\(\delta\)</span>：<strong>DID推定量</strong>（処置の因果効果）</li>
+</ul>
+<p><strong><span class="math inline">\(\delta\)</span> の解釈</strong>：処置群が2期目に受けた追加的な効果、つまり健康ショックの因果効果です。</p>
+</section>
+</section>
+<section id="plm-パッケージによるパネルデータ分析" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="plm-パッケージによるパネルデータ分析"><span class="header-section-number">3</span> plm パッケージによるパネルデータ分析</h2>
+<section id="plm-パッケージのインストールと読み込み" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="plm-パッケージのインストールと読み込み"><span class="header-section-number">3.1</span> plm パッケージのインストールと読み込み</h3>
+<p><code>plm</code> パッケージは、パネルデータ分析のための標準的なRパッケージです。固定効果モデル、変量効果モデル、1階差分法など、さまざまなパネルデータ推定法を提供します。</p>
+<p>主な機能：</p>
+<ul>
+<li><strong>plm()</strong>：パネルデータ回帰の推定</li>
+<li><strong>model</strong>：推定方法の指定（“pooling”, “within”, “random”, “fd”など）</li>
+<li><strong>effect</strong>：固定効果の種類（“individual”, “time”, “twoways”）</li>
+<li><strong>pFtest(), phtest()</strong>：モデル選択のための検定</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="モデル1-1階差分法first-difference" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="モデル1-1階差分法first-difference"><span class="header-section-number">3.2</span> モデル1: 1階差分法（First Difference）</h3>
+<p>1階差分法は、各個人の2時点間の差を取ることで、時間不変の個人固有効果を除去する方法です。</p>
+<p><span class="math display">\[
+\Delta life_i = life_{i2} - life_{i1} = \gamma + \delta \cdot shock_i + \Delta income_i + \Delta \varepsilon_i
+\]</span></p>
+<p><code>plm()</code> で <code>model = "fd"</code> を指定します。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1階差分法（fd）による回帰</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>preg_fd <span class="ot">&lt;-</span> <span class="fu">plm</span>(life <span class="sc">~</span> shock_y2 <span class="sc">+</span> income, </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> life9, </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">effect =</span> <span class="st">"individual"</span>, </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">model =</span> <span class="st">"fd"</span>, </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">index =</span> <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"t"</span>))</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(preg_fd)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Oneway (individual) effect First-Difference Model</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; plm(formula = life ~ shock_y2 + income, data = life9, effect = "individual", </span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     model = "fd", index = c("id", "t"))</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Balanced Panel: n = 3020, T = 2, N = 6040</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Observations used in estimation: 3020</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      Min.   1st Qu.    Median   3rd Qu.      Max. </span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -4.260022 -1.075247 -0.097576  0.806964  3.969410 </span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                Estimate  Std. Error t-value  Pr(&gt;|t|)    </span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  0.21536463  0.03135500  6.8686 7.842e-12 ***</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; shock_y2    -0.14011741  0.04844452 -2.8923  0.003851 ** </span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; income       0.00022329  0.00016141  1.3834  0.166659    </span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total Sum of Squares:    5186.5</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual Sum of Squares: 5168.7</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; R-Squared:      0.0034335</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Adj. R-Squared: 0.0027729</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 5.19735 on 2 and 3017 DF, p-value: 0.0055809</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>結果の解釈</strong>：</p>
+<ul>
+<li><strong>shock_y2</strong> の係数（約 <strong>-0.140</strong>）がDID推定量です。これは健康ショックを受けた人が2期目に経験した生活満足度への追加的な影響を表します。係数が負であることは、健康ショックが生活満足度を約0.14ポイント低下させることを意味します（1%水準で有意）。</li>
+<li>1階差分法では、時間不変の個人特性（性格、遺伝的要因など）が自動的に除去されます。</li>
+</ul>
+</section>
+<section id="モデル2-固定効果モデルwithin推定量" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="モデル2-固定効果モデルwithin推定量"><span class="header-section-number">3.3</span> モデル2: 固定効果モデル（Within推定量）</h3>
+<p>固定効果モデルは、各個人の平均からの偏差を用いて推定を行います。1階差分法と同様に、時間不変の個人固有効果を除去できます。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 固定効果モデル（within）を用いた回帰</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>preg_fe <span class="ot">&lt;-</span> <span class="fu">plm</span>(life <span class="sc">~</span> shock <span class="sc">+</span> y2 <span class="sc">+</span> shock_y2 <span class="sc">+</span> income, </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> life9, </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">effect =</span> <span class="st">"individual"</span>, </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">model =</span> <span class="st">"within"</span>, </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">index =</span> <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"t"</span>))</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(preg_fe)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Oneway (individual) effect Within Model</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; plm(formula = life ~ shock + y2 + shock_y2 + income, data = life9, </span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     effect = "individual", model = "within", index = c("id", </span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         "t"))</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Balanced Panel: n = 3020, T = 2, N = 6040</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Min.  1st Qu.   Median  3rd Qu.     Max. </span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -2.13001 -0.45121  0.00000  0.45121  2.13001 </span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             Estimate  Std. Error t-value  Pr(&gt;|t|)    </span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; y2        0.21536463  0.03135500  6.8686 7.842e-12 ***</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; shock_y2 -0.14011741  0.04844452 -2.8923  0.003851 ** </span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; income    0.00022329  0.00016141  1.3834  0.166659    </span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total Sum of Squares:    2634</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual Sum of Squares: 2584.4</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; R-Squared:      0.018844</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Adj. R-Squared: -0.96394</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 19.3148 on 3 and 3017 DF, p-value: 2.1065e-12</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>結果の解釈</strong>：</p>
+<ul>
+<li>固定効果モデルでは、<code>shock</code> は時間不変なので推定されません（個人固定効果に吸収されます）。</li>
+<li><code>y2</code> の係数（約 <strong>0.215</strong>）は時間効果を表し、<code>shock_y2</code>（約 <strong>-0.140</strong>）がDID推定量です。</li>
+<li>2時点パネルの場合、1階差分法と固定効果モデルは<strong>同じ推定量</strong>を与えます。実際に両モデルで shock_y2 と income の係数が一致していることを確認できます。</li>
+</ul>
+</section>
+<section id="モデル3-プーリングols" class="level3" data-number="3.4">
+<h3 data-number="3.4" class="anchored" data-anchor-id="モデル3-プーリングols"><span class="header-section-number">3.4</span> モデル3: プーリングOLS</h3>
+<p>比較のため、個人固有効果を無視したプーリングOLSも推定します。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># プーリングOLSを用いた回帰</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>preg_p <span class="ot">&lt;-</span> <span class="fu">plm</span>(life <span class="sc">~</span> shock <span class="sc">+</span> y2 <span class="sc">+</span> shock_y2 <span class="sc">+</span> income, </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">data =</span> life9, </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">effect =</span> <span class="st">"individual"</span>, </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">model =</span> <span class="st">"pooling"</span>, </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">index =</span> <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"t"</span>))</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(preg_p)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Pooling Model</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; plm(formula = life ~ shock + y2 + shock_y2 + income, data = life9, </span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     effect = "individual", model = "pooling", index = c("id", </span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         "t"))</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Balanced Panel: n = 3020, T = 2, N = 6040</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Min.  1st Qu.   Median  3rd Qu.     Max. </span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -2.97119 -0.59113  0.30241  0.48499  1.54578 </span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                Estimate  Std. Error t-value  Pr(&gt;|t|)    </span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  2.4542e+00  2.6219e-02 93.6050 &lt; 2.2e-16 ***</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; shock        1.5318e-02  3.4994e-02  0.4377  0.661606    </span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; y2           2.1298e-01  3.1689e-02  6.7207 1.974e-11 ***</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; shock_y2    -1.3977e-01  4.9478e-02 -2.8250  0.004744 ** </span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; income       3.0399e-04  5.1187e-05  5.9389 3.028e-09 ***</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total Sum of Squares:    5478.3</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual Sum of Squares: 5393.6</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; R-Squared:      0.015466</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Adj. R-Squared: 0.014814</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 23.7011 on 4 and 6035 DF, p-value: &lt; 2.22e-16</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>プーリングOLS vs 固定効果モデル</strong>：</p>
+<p>プーリングOLSは個人固有効果を無視するため、もし個人固有効果が説明変数と相関していれば、推定量にバイアスが生じます。</p>
+</section>
+<section id="f検定固定効果の有意性" class="level3" data-number="3.5">
+<h3 data-number="3.5" class="anchored" data-anchor-id="f検定固定効果の有意性"><span class="header-section-number">3.5</span> F検定：固定効果の有意性</h3>
+<p>固定効果モデルとプーリングOLSのどちらが適切かを検定します。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># F検定：固定効果の有意性</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pFtest</span>(preg_fe, preg_p)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  F test for individual effects</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; data:  life ~ shock + y2 + shock_y2 + income</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F = 1.0866, df1 = 3018, df2 = 3017, p-value = 0.01125</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: significant effects</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>結果の解釈</strong>：</p>
+<ul>
+<li>帰無仮説：「すべての個人固定効果がゼロ」（プーリングOLSが適切）</li>
+<li>p値 = 0.011 で5%水準で有意なので、帰無仮説を棄却し、固定効果モデルが適切と判断します。</li>
+<li>固定効果が有意であれば、個人差を考慮した分析が必要ということになります。</li>
+</ul>
+</section>
+<section id="モデル4-変量効果モデル" class="level3" data-number="3.6">
+<h3 data-number="3.6" class="anchored" data-anchor-id="モデル4-変量効果モデル"><span class="header-section-number">3.6</span> モデル4: 変量効果モデル</h3>
+<p>変量効果モデルは、個人固有効果を確率変数として扱います。固定効果モデルより効率的ですが、個人固有効果と説明変数が無相関という強い仮定が必要です。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 変量効果モデル（random）を用いた回帰</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>preg_re <span class="ot">&lt;-</span> <span class="fu">plm</span>(life <span class="sc">~</span> shock <span class="sc">+</span> y2 <span class="sc">+</span> shock_y2 <span class="sc">+</span> income, </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> life9, </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">effect =</span> <span class="st">"individual"</span>, </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">model =</span> <span class="st">"random"</span>, </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">index =</span> <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"t"</span>))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(preg_re)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Oneway (individual) effect Random Effect Model </span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    (Swamy-Arora's transformation)</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; plm(formula = life ~ shock + y2 + shock_y2 + income, data = life9, </span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     effect = "individual", model = "random", index = c("id", </span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         "t"))</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Balanced Panel: n = 3020, T = 2, N = 6040</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Effects:</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                   var std.dev share</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; idiosyncratic 0.85660 0.92553 0.958</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; individual    0.03723 0.19294 0.042</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; theta: 0.04082</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     Min.  1st Qu.   Median  3rd Qu.     Max. </span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -2.89772 -0.57890  0.29064  0.47237  1.55096 </span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                Estimate  Std. Error z-value  Pr(&gt;|z|)    </span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  2.4544e+00  2.6336e-02 93.1956 &lt; 2.2e-16 ***</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; shock        1.5308e-02  3.4995e-02  0.4374  0.661800    </span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; y2           2.1300e-01  3.1025e-02  6.8652 6.639e-12 ***</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; shock_y2    -1.3978e-01  4.8437e-02 -2.8857  0.003905 ** </span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; income       3.0332e-04  5.2024e-05  5.8304 5.528e-09 ***</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total Sum of Squares:    5250.9</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual Sum of Squares: 5169</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; R-Squared:      0.015598</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Adj. R-Squared: 0.014946</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Chisq: 95.628 on 4 DF, p-value: &lt; 2.22e-16</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>固定効果 vs 変量効果の違い</strong>：</p>
+<p>両モデルとも個人固有効果 <span class="math inline">\(\alpha_i\)</span> を確率変数として扱いますが、説明変数との相関についての仮定が異なります。</p>
+<table class="table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 42%">
+<col style="width: 42%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>特徴</th>
+<th>固定効果モデル</th>
+<th>変量効果モデル</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>個人効果 <span class="math inline">\(\alpha_i\)</span></td>
+<td>確率変数</td>
+<td>確率変数</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\alpha_i\)</span> と説明変数の相関</td>
+<td>相関があってもよい</td>
+<td>無相関を仮定</td>
+</tr>
+<tr class="odd">
+<td>推定方法</td>
+<td>Within変換（個人平均からの偏差）</td>
+<td>GLS（一般化最小二乗法）</td>
+</tr>
+<tr class="even">
+<td>効率性</td>
+<td>低い</td>
+<td>高い（仮定が正しければ）</td>
+</tr>
+<tr class="odd">
+<td>一致性</td>
+<td>常に一致推定量</td>
+<td>無相関の仮定が満たされれば一致</td>
+</tr>
+<tr class="even">
+<td>時間不変変数</td>
+<td>推定不可（Within変換で消える）</td>
+<td>推定可能</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ポイント</strong>：固定効果モデルは「個人効果と説明変数が相関している」という現実的な状況でも一致推定量を与えるため、因果推論ではより頑健です。一方、変量効果モデルは無相関の仮定が正しければより効率的（標準誤差が小さい）な推定が可能です。</p>
+</section>
+<section id="hausman検定固定効果-vs-変量効果" class="level3" data-number="3.7">
+<h3 data-number="3.7" class="anchored" data-anchor-id="hausman検定固定効果-vs-変量効果"><span class="header-section-number">3.7</span> Hausman検定：固定効果 vs 変量効果</h3>
+<p>どちらのモデルが適切かを検定します。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hausman検定</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">phtest</span>(preg_re, preg_fe)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Hausman Test</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; data:  life ~ shock + y2 + shock_y2 + income</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; chisq = 0.27439, df = 3, p-value = 0.9648</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: one model is inconsistent</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>結果の解釈</strong>：</p>
+<ul>
+<li>帰無仮説：「個人固有効果と説明変数は無相関」（変量効果モデルが適切）</li>
+<li>p値 = 0.965 と非常に大きいため、帰無仮説を棄却できません。この場合、変量効果モデルが適切と判断できます。</li>
+<li>変量効果モデルは固定効果モデルより効率的なので、Hausman検定で棄却されなければ変量効果モデルを使うことが推奨されます。</li>
+</ul>
+</section>
+</section>
+<section id="教育的ポイント" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="教育的ポイント"><span class="header-section-number">4</span> 教育的ポイント</h2>
+<section id="didの識別仮定" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="didの識別仮定"><span class="header-section-number">4.1</span> 1. DIDの識別仮定</h3>
+<p>DIDが因果効果を正しく識別するためには、<strong>平行トレンド仮定</strong>が必要です：</p>
+<blockquote class="blockquote">
+<p>処置がなかった場合、処置群と対照群は同じトレンドで変化していたはず</p>
+</blockquote>
+<p>この仮定が満たされない場合（例：健康ショックを受けやすい人はもともと生活満足度が低下傾向にあった）、DID推定量にはバイアスが生じます。</p>
+</section>
+<section id="固定効果と1階差分の関係" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="固定効果と1階差分の関係"><span class="header-section-number">4.2</span> 2. 固定効果と1階差分の関係</h3>
+<p>2時点パネルでは：</p>
+<ul>
+<li><strong>1階差分法</strong> = <strong>固定効果モデル</strong>（同じ推定量）</li>
+</ul>
+<p>3時点以上のパネルでは：</p>
+<ul>
+<li>誤差項に系列相関がなければ、固定効果モデルの方が効率的</li>
+<li>誤差項がランダムウォークなら、1階差分法の方が効率的</li>
+</ul>
+</section>
+<section id="モデル選択の指針" class="level3" data-number="4.3">
+<h3 data-number="4.3" class="anchored" data-anchor-id="モデル選択の指針"><span class="header-section-number">4.3</span> 3. モデル選択の指針</h3>
+<ol type="1">
+<li><strong>pFtest</strong>：固定効果が有意か？ → 有意なら固定効果モデルを使用</li>
+<li><strong>phtest</strong>（Hausman検定）：個人効果と説明変数は無相関か？
+<ul>
+<li>棄却 → 固定効果モデル</li>
+<li>棄却されない → 変量効果モデル（効率性のため）</li>
+</ul></li>
+</ol>
+</section>
+<section id="政策評価への応用" class="level3" data-number="4.4">
+<h3 data-number="4.4" class="anchored" data-anchor-id="政策評価への応用"><span class="header-section-number">4.4</span> 4. 政策評価への応用</h3>
+<p>DIDは政策評価で広く使われます：</p>
+<ul>
+<li><strong>例</strong>：ある県で保育所が増設された → 女性の就業率への効果</li>
+<li><strong>処置群</strong>：保育所が増えた県</li>
+<li><strong>対照群</strong>：保育所が増えなかった県</li>
+<li><strong>DID推定量</strong>：政策の因果効果</li>
+</ul>
+<p>ただし、政策の実施が無作為でない場合（例：就業意欲が高い県ほど保育所を増やした）、平行トレンド仮定が満たされない可能性があります。</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
