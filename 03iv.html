@@ -109,8 +109,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="操作変数法instrumental-variables-method" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="操作変数法instrumental-variables-method"><span class="header-section-number">1</span> 操作変数法（Instrumental Variables Method）</h2>
-<p>回帰分析において、説明変数と誤差項が相関している場合（内生性がある場合）、通常の最小二乗法（OLS）による推定量はバイアスを持ち、一致性を失います。教育年数が賃金に与える影響を推定するミンサー方程式の例では、個人の「能力」などの観察できない要因が、教育年数と賃金の両方に影響を与える可能性があります。この場合、教育年数の係数は過大評価（上方バイアス）される傾向があります。</p>
-<p>このような内生性の問題に対処するために用いられるのが<strong>操作変数法（IV法）</strong>です。</p>
+<p>回帰分析において、説明変数と誤差項が相関している場合（<strong>内生性</strong> がある場合）、通常の最小二乗法（OLS）による推定量はバイアスを持ち、一致性を失います。</p>
+<p>教育年数が賃金に与える影響を推定するミンサー方程式の例では、個人の <strong>「能力」</strong> などの観察できない要因が問題となります。能力が高い人は、以下の2つの経路で賃金に影響します。</p>
+<ol type="1">
+<li>能力が高いと、より多くの教育を受ける傾向がある（教育年数が長くなる）</li>
+<li>能力が高いと、同じ教育年数でも賃金が高くなる（誤差項に含まれる）</li>
+</ol>
+<p>このため、教育年数と誤差項が正の相関を持ち、OLSで推定した教育の効果には <strong>上方バイアス</strong>（過大評価）が生じます。つまり、教育の純粋な効果だけでなく、能力の効果も含まれてしまうのです。</p>
+<p>このような内生性の問題に対処するために用いられるのが <strong>操作変数法（IV法）</strong> です。操作変数法では、内生変数（教育年数）と相関しているが、誤差項（能力など）とは相関していない <strong>操作変数</strong> を用いることで、因果効果を一致性を持って推定することができます。</p>
 <section id="データの読み込み" class="level3" data-number="1.1">
 <h3 data-number="1.1" class="anchored" data-anchor-id="データの読み込み"><span class="header-section-number">1.1</span> データの読み込み</h3>
 <p>まず、データを読み込みます。ここでは <code>8_income.csv</code> を使用します。主な変数は以下の通りです。</p>
@@ -167,9 +173,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>次に、操作変数法を用いて推定を行います。 ここでは、本人の教育年数 <code>yeduc</code> の操作変数として、親の教育年数（あるいは学費の支払い能力などに関連する変数と想定される）<code>payeduc</code> を使用します。</p>
 <p>操作変数が満たすべき条件は以下の2つです：</p>
 <ol type="1">
-<li><strong>関連性（Relevance）</strong>: 操作変数（<code>payeduc</code>）は内生変数（<code>yeduc</code>）と相関していること。</li>
-<li><strong>外生性（Exogeneity）</strong>: 操作変数（<code>payeduc</code>）は誤差項とは相関していないこと（賃金に対して、教育年数を通じた経路以外で直接的な影響を持たないこと）。</li>
+<li><strong>関連性（Relevance）</strong>: 操作変数（<code>payeduc</code>）は内生変数（<code>yeduc</code>）と相関していること。これは統計的に検証可能で、第1段階回帰にF検定を適用することで判定できます。</li>
+<li><strong>外生性（Exogeneity）</strong>: 操作変数（<code>payeduc</code>）は誤差項とは相関していないこと（賃金に対して、教育年数を通じた経路以外で直接的な影響を持たないこと）。この条件は統計的に検証することが困難で、理論的・経済学的な議論に基づいて判断する必要があります。</li>
 </ol>
+<p>本例では、親の教育費支払い能力（<code>payeduc</code>）は、子供の教育年数に影響を与える可能性が高い一方で（関連性）、親の経済力が子供の本来の能力や働き方に直接影響しないと仮定すれば（外生性）、適切な操作変数と考えられます。</p>
 <p>Rで操作変数法を行うには、<code>AER</code> パッケージの <code>ivreg()</code> 関数が便利です。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AER)</span>
@@ -331,15 +338,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>診断結果の解釈は以下の通りです。</p>
 <ul>
-<li><strong>Weak instruments（弱操作変数検定）</strong>: p値が非常に小さく（&lt; 0.01）、帰無仮説（操作変数が弱い）は棄却されます。したがって、操作変数は内生変数と十分に強い相関を持っていると言えます。</li>
-<li><strong>Wu-Hausman（ハウスマン検定）</strong>: p値は約0.491であり、帰無仮説（OLSとIVの推定値に差がない＝内生性がない）を棄却できません。これは、統計的にはOLS推定値とIV推定値に有意な差が見られないことを示唆しています（ただし、理論的に内生性が疑われる場合はIV法を用いることが推奨されることもあります）。</li>
-<li><strong>Sargan（過剰識別検定）</strong>: p値は約0.525であり、帰無仮説（すべての操作変数が外生である）を棄却できません。これは、使用した操作変数（<code>payeduc</code> と <code>sibs</code>）が外生性条件を満たしているという仮定と矛盾しないことを示しています。</li>
+<li><strong>Weak instruments（弱操作変数検定）</strong>: p値が非常に小さく（&lt; 0.01）、帰無仮説（操作変数が弱い）は棄却されます。したがって、操作変数は内生変数と十分に強い相関を持っていると言えます（関連性条件を満たしている）。弱操作変数の問題があると、IV推定量が不安定になり、信頼性が低下します。</li>
+<li><strong>Wu-Hausman（ハウスマン検定）</strong>: p値は約0.491であり、帰無仮説（OLSとIVの推定値に差がない＝内生性がない）を5%水準では棄却できません。これは、統計的にはOLS推定値とIV推定値に有意な差が見られないことを示唆しています。ただし、理論的に内生性が疑われる場合や、検定の検出力（power）が低い可能性がある場合は、IV法を用いることが推奨されることもあります。</li>
+<li><strong>Sargan（過剰識別検定）</strong>: p値は約0.525であり、帰無仮説（すべての操作変数が外生である）を棄却できません。これは、使用した操作変数（<code>payeduc</code> と <code>sibs</code>）が外生性条件を満たしているという仮定と矛盾しないことを示しています。言い換えれば、操作変数が誤差項と相関しているという証拠は見つからなかったと解釈できます。</li>
 </ul>
-<p>なお過剰識別検定は操作変数の数が内生変数の数より厳密に多くなければ計算されません。</p>
+<p>なお、過剰識別検定は <strong>操作変数の数が内生変数の数より厳密に多くなければ計算されません</strong>。本例では、内生変数が1つ（<code>yeduc</code>）、操作変数が2つ（<code>payeduc</code>, <code>sibs</code>）であるため、過剰識別検定が実行可能です。</p>
 </section>
 <section id="ロバスト標準誤差" class="level3" data-number="3.2">
 <h3 data-number="3.2" class="anchored" data-anchor-id="ロバスト標準誤差"><span class="header-section-number">3.2</span> ロバスト標準誤差</h3>
-<p>回帰分析において、誤差項の分散が均一でない <strong>不均一分散</strong> （heteroskedasticity）が存在する場合、通常の標準誤差は過小評価される傾向があり、統計的推論が誤る可能性があります。このような場合、<code>summary()</code> 関数に <code>vcov</code> オプションを指定し、<code>vcovHC()</code> 関数（<code>sandwich</code> パッケージ由来）を用いて <strong>ロバスト標準誤差</strong> （robust standard errors）を計算することで、不均一分散に頑健な標準誤差を得ることができます。<code>type = "HC1"</code> は、ロバスト標準誤差の計算方法の一つを指定しています。</p>
+<p>回帰分析において、誤差項の分散が均一でない <strong>不均一分散</strong> （heteroskedasticity）が存在する場合、通常の標準誤差は過小評価される傾向があり、統計的推論が誤る可能性があります。このような場合、<code>summary()</code> 関数に <code>vcov</code> オプションを指定し、<code>vcovHC()</code> 関数（<code>sandwich</code> パッケージ由来）を用いて <strong>ロバスト標準誤差</strong> （robust standard errors）を計算することで、不均一分散に頼健な標準誤差を得ることができます。</p>
+<p><code>type = "HC1"</code> は、<strong>ホワイトの不均一分散一致推定量（Heteroskedasticity-Consistent Estimator）</strong> の一種です。HC0, HC1, HC2, HC3など複数のタイプがありますが、HC1はStataのデフォルトなどでも使われ、小規模サンプルでのバイアスを誤差項の自由度で調整する方法です。HC2やHC3はさらに改善された方法で、一般的に推奨されることが多いです。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 分散共分散行列を計算</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>vcov <span class="ot">&lt;-</span> <span class="fu">vcovHC</span>(ivreg2, <span class="at">type =</span> <span class="st">"HC1"</span>)</span>
@@ -376,33 +384,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><code>estimatr</code>パッケージは、<code>ivreg</code>関数を用いて操作変数法を実行する際に、より簡単に診断統計量を確認することができます。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>ivreg3 <span class="ot">&lt;-</span> <span class="fu">iv_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span> exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8, <span class="at">se_type =</span> <span class="st">"HC1"</span>, <span class="at">diagnostics =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg3)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; iv_robust(formula = lincome ~ yeduc + exper + exper2 | exper + </span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     exper2 + payeduc + sibs, data = income8, se_type = "HC1", </span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     diagnostics = TRUE)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>ivreg3 <span class="ot">&lt;-</span> <span class="fu">iv_robust</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> income8,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">se_type =</span> <span class="st">"stata"</span>, <span class="at">diagnostics =</span> <span class="cn">TRUE</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg3)</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  HC1 </span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)  CI Lower  CI Upper  DF</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.524145  0.3252807  13.908 3.510e-39  3.885548 5.1627420 730</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; yeduc        0.069909  0.0218722   3.196 1.452e-03  0.026969 0.1128492 730</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper        0.060959  0.0156393   3.898 1.060e-04  0.030256 0.0916626 730</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2      -0.001042  0.0005904  -1.764 7.809e-02 -0.002201 0.0001174 730</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.2432 ,    Adjusted R-squared:  0.2401 </span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 25.21 on 3 and 730 DF,  p-value: 1.577e-15</span></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Diagnostics:</span></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  numdf dendf  value  p.value    </span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Weak instruments     2   729 34.692 4.05e-15 ***</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Wu-Hausman           1   729  0.487    0.485    </span></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Overidentifying      1    NA  0.484    0.487    </span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; iv_robust(formula = lincome ~ yeduc + exper + exper2 | exper + </span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     exper2 + payeduc + sibs, data = income8, se_type = "stata", </span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     diagnostics = TRUE)</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  HC1 </span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)  CI Lower  CI Upper  DF</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.524145  0.3252807  13.908 3.510e-39  3.885548 5.1627420 730</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; yeduc        0.069909  0.0218722   3.196 1.452e-03  0.026969 0.1128492 730</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper        0.060959  0.0156393   3.898 1.060e-04  0.030256 0.0916626 730</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2      -0.001042  0.0005904  -1.764 7.809e-02 -0.002201 0.0001174 730</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.2432 ,    Adjusted R-squared:  0.2401 </span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 25.21 on 3 and 730 DF,  p-value: 1.577e-15</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Diagnostics:</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  numdf dendf  value  p.value    </span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Weak instruments     2   729 34.692 4.05e-15 ***</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Wu-Hausman           1   729  0.487    0.485    </span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Overidentifying      1    NA  0.484    0.487    </span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><code>summary(ivreg3)</code> の結果を確認すると、<code>Standard error type: HC1</code> と表示されており、ロバスト標準誤差が使用されていることがわかります。 また、<code>yeduc</code> の係数（Estimate）は約 0.0699 であり、標準誤差（Std. Error）は約 0.0219 となっています。これは、先ほど <code>ivreg</code> と <code>vcovHC</code> を組み合わせて計算した結果と一致しています。</p>
 <p>さらに、<code>Diagnostics</code> セクションには、弱操作変数検定（Weak instruments）、Wu-Hausman検定、過剰識別検定（Overidentifying）の結果も表示されています。これらも <code>ivreg</code> で <code>diagnostics = TRUE</code> を指定した際の結果と整合的ですが、ここではロバスト標準誤差を考慮した上で計算されている点に注意が必要です（ただし、この例では診断統計量の値も大きくは変わっていません）。</p>
@@ -410,35 +423,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>なお、<code>se_type = "classical"</code> を指定することで、通常の標準誤差を計算することができます。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ivreg4 <span class="ot">&lt;-</span> <span class="fu">iv_robust</span>(lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span> exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs, <span class="at">data =</span> income8, <span class="at">se_type =</span> <span class="st">"classical"</span>, <span class="at">diagnostics =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg4)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; iv_robust(formula = lincome ~ yeduc + exper + exper2 | exper + </span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     exper2 + payeduc + sibs, data = income8, se_type = "classical", </span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     diagnostics = TRUE)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ivreg4 <span class="ot">&lt;-</span> <span class="fu">iv_robust</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    lincome <span class="sc">~</span> yeduc <span class="sc">+</span> exper <span class="sc">+</span> exper2 <span class="sc">|</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        exper <span class="sc">+</span> exper2 <span class="sc">+</span> payeduc <span class="sc">+</span> sibs,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> income8,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">se_type =</span> <span class="st">"classical"</span>, <span class="at">diagnostics =</span> <span class="cn">TRUE</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ivreg4)</span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  classical </span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|) CI Lower  CI Upper  DF</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.524145  0.3286803  13.765 1.712e-38  3.87887 5.1694162 730</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; yeduc        0.069909  0.0217875   3.209 1.392e-03  0.02714 0.1126830 730</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper        0.060959  0.0160773   3.792 1.620e-04  0.02940 0.0925226 730</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2      -0.001042  0.0006104  -1.707 8.829e-02 -0.00224 0.0001565 730</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.2432 ,    Adjusted R-squared:  0.2401 </span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 23.09 on 3 and 730 DF,  p-value: 2.753e-14</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Diagnostics:</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  numdf dendf  value  p.value    </span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Weak instruments     2   729 32.831 2.23e-14 ***</span></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Wu-Hausman           1   729  0.474    0.491    </span></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Overidentifying      1    NA  0.403    0.525    </span></span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; iv_robust(formula = lincome ~ yeduc + exper + exper2 | exper + </span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     exper2 + payeduc + sibs, data = income8, se_type = "classical", </span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     diagnostics = TRUE)</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  classical </span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|) CI Lower  CI Upper  DF</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.524145  0.3286803  13.765 1.712e-38  3.87887 5.1694162 730</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; yeduc        0.069909  0.0217875   3.209 1.392e-03  0.02714 0.1126830 730</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper        0.060959  0.0160773   3.792 1.620e-04  0.02940 0.0925226 730</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; exper2      -0.001042  0.0006104  -1.707 8.829e-02 -0.00224 0.0001565 730</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.2432 ,    Adjusted R-squared:  0.2401 </span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 23.09 on 3 and 730 DF,  p-value: 2.753e-14</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Diagnostics:</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  numdf dendf  value  p.value    </span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Weak instruments     2   729 32.831 2.23e-14 ***</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Wu-Hausman           1   729  0.474    0.491    </span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Overidentifying      1    NA  0.403    0.525    </span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>この結果は、<code>ivreg</code> 関数で <code>diagnostics = TRUE</code> を指定した場合（ロバスト標準誤差を使わない場合）の結果と一致します。</p>
+<p>この結果は、<code>ivreg</code> 関数で <code>diagnostics = TRUE</code> を指定した場合（ロバスト標準誤差を使わない場合）の結果と一致します。<code>se_type = "classical"</code> では、通常の最小二乗法（OLS）の標準誤差が計算され、誤差項が独立で均一分散であるという厳密な仮定の下での推論となります。一方、<code>se_type = "HC1"</code> や <code>"stata"</code> を使用すると、不均一分散に対して頺健な推論が可能になります。</p>
 </section>
 
 </main>
