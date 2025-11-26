@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Yamaguchi 回帰分析</title>
+<title>R使い方入門：パネルデータ分析とクラスターロバスト標準偏差つき固定効果モデルの実践</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -90,7 +90,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Yamaguchi 回帰分析</h1>
+<h1 class="title">R使い方入門：パネルデータ分析とクラスターロバスト標準偏差つき固定効果モデルの実践</h1>
 </div>
 
 
@@ -109,6 +109,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="データの読み込みと整形" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="データの読み込みと整形"><span class="header-section-number">1</span> データの読み込みと整形</h2>
+<p>このドキュメントでは、西山慶彦・新谷元嗣・川口大司・奥井亮 (2019)『計量経済学』有斐閣の<strong>第6章「パネルデータ分析」</strong>で紹介されている実証例を再現します。</p>
+<p>分析テーマは、<strong>既婚女性の労働供給</strong>に関するパネルデータを用いて、<strong>保育所の整備（資本率: cap.rate）が女性の雇用率（emp.rate）に与える影響</strong>を検証することです。これは労働経済学や公共政策の分野で重要なテーマであり、「保育所が増えると女性の就業率は上がるのか？」という因果関係を検証する実証分析の一例です。データは山口（2009）に基づいています。</p>
 <p>ここでは <code>yamaguchi.csv</code> を読み込み、2000年以降かつ世帯タイプが <code>all</code> の観測だけを残したデータを使って、雇用率と資本率の関係を検討します。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># データ読み込みと確認</span></span>
@@ -149,375 +151,1360 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="モデル定義と概要" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="モデル定義と概要"><span class="header-section-number">2</span> モデル定義と概要</h2>
-<p>以下では単純なOLSから、クラスタリングや固定効果を導入したモデル、加えて制御変数を含むモデルまで段階的に推定します。それぞれのモデルは表で比較します。</p>
+<p>パネルデータ分析では、<strong>固定効果（fixed effects）</strong>を導入することで、観察できない個体差や時点差をコントロールできます。以下では単純なOLSから、クラスタリングや固定効果を導入したモデル、加えて制御変数を含むモデルまで段階的に推定します。それぞれのモデルは表で比較します。</p>
+<section id="estimatr-パッケージのインストールと読み込み" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="estimatr-パッケージのインストールと読み込み"><span class="header-section-number">2.1</span> estimatr パッケージのインストールと読み込み</h3>
+<p><code>estimatr</code> パッケージは、頑健な標準誤差（ロバスト標準誤差）やクラスター標準誤差を簡単に計算できるパッケージです。<code>lm_robust()</code> 関数を使うことで、クロスセクション分析だけでなく、今回のようなパネルデータ分析においても、固定効果モデルやクラスタリングを含む回帰分析を効率的に実行できます。</p>
+<p>主な機能：</p>
+<ul>
+<li><strong>lm_robust()</strong>：頑健標準誤差付きの線形回帰</li>
+<li><strong>se_type</strong>：標準誤差の種類を指定（“stata” は Stata と同じ HC1 タイプ）</li>
+<li><strong>clusters</strong>：クラスター標準誤差の計算</li>
+<li><strong>fixed_effects</strong>：固定効果の指定（ダミー変数を明示的に作らなくてよい）</li>
+</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル1: 単純OLS</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>fm1 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(emp.rate <span class="sc">~</span> cap.rate, </span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> yamaguchi, <span class="at">se_type =</span> <span class="st">"stata"</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm1)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm_robust(formula = emp.rate ~ cap.rate, data = yamaguchi, se_type = "stata")</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  HC1 </span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             Estimate Std. Error t value  Pr(&gt;|t|) CI Lower CI Upper  DF</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)   0.2081    0.01814   11.47 7.493e-22   0.1723   0.2440 139</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate      0.6155    0.04391   14.02 2.244e-28   0.5287   0.7023 139</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.5336 ,    Adjusted R-squared:  0.5302 </span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 196.5 on 1 and 139 DF,  p-value: &lt; 2.2e-16</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p><strong>ポイント</strong>：</p>
+<ul>
+<li><strong>クラスター標準誤差</strong>：都道府県内で誤差が相関している可能性があるため、都道府県でクラスタリングして標準誤差を計算します。</li>
+<li><strong>固定効果</strong>：都道府県固定効果は「各県固有の特性」を、年固定効果は「全国共通のマクロショック」をコントロールします。</li>
+</ul>
+</section>
+<section id="クラスターロバスト標準誤差とは" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="クラスターロバスト標準誤差とは"><span class="header-section-number">2.2</span> クラスターロバスト標準誤差とは？</h3>
+<p>通常の回帰分析では、各観測値の誤差項が<strong>互いに独立</strong>であると仮定します。しかし、パネルデータでは同じ都道府県のデータが複数年にわたって含まれるため、この仮定が成り立たない可能性があります。</p>
+<p><strong>なぜ誤差が相関するのか？</strong></p>
+<p>例えば、東京都の2000年、2005年、2010年のデータを考えてみましょう。東京都には観察できない固有の特性（例：都市化の程度、産業構造、住民の価値観など）があり、これらは3時点すべてに影響します。このような観察できない要因が誤差項に含まれると、同じ都道府県内の誤差は互いに相関してしまいます。</p>
+<p><strong>問題点</strong>：誤差の相関を無視すると、標準誤差が過小評価され、t値が過大になり、「本当は有意でない変数が有意に見えてしまう」という問題が生じます。</p>
+<p><strong>解決策：クラスターロバスト標準誤差</strong></p>
+<p>クラスターロバスト標準誤差は、「同じクラスター（ここでは都道府県）内では誤差が相関していても構わない」という緩い仮定のもとで、正しい標準誤差を計算する方法です。</p>
+<ul>
+<li><strong>クラスター内</strong>：誤差の相関を許容</li>
+<li><strong>クラスター間</strong>：誤差は独立と仮定</li>
+</ul>
+<p><code>lm_robust()</code> では <code>clusters = pref</code> と指定することで、都道府県ごとにクラスタリングした標準誤差を計算できます。</p>
+<p><strong>注意点</strong>：クラスターロバスト標準誤差が適切に機能するためには、クラスターの数がある程度多い（一般的には30〜50以上）ことが望ましいとされています。今回のデータでは47都道府県がクラスターとなっており、この条件を満たしています。</p>
+</section>
+<section id="モデル1-単純ols固定効果なし" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="モデル1-単純ols固定効果なし"><span class="header-section-number">2.3</span> モデル1: 単純OLS（固定効果なし）</h3>
+<p>まずは固定効果を入れない単純な回帰から始めます。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル2: クラスタリングと都道府県固定効果</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fm2 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  emp.rate <span class="sc">~</span> cap.rate,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> yamaguchi,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">se_type =</span> <span class="st">"stata"</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">clusters =</span> pref,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed_effects =</span> pref</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm2)</span>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル1: 単純OLS</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fm1 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(emp.rate <span class="sc">~</span> cap.rate, </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> yamaguchi, <span class="at">se_type =</span> <span class="st">"stata"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm1)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm_robust(formula = emp.rate ~ cap.rate, data = yamaguchi, se_type = "stata")</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  HC1 </span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm_robust(formula = emp.rate ~ cap.rate, data = yamaguchi, clusters = pref, </span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     fixed_effects = pref, se_type = "stata")</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  stata </span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          Estimate Std. Error t value  Pr(&gt;|t|) CI Lower CI Upper DF</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate   0.8051    0.05531   14.56 7.736e-19   0.6938   0.9164 46</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.9836 ,    Adjusted R-squared:  0.9754</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared (proj. model):  0.859 ,   Adjusted R-squared (proj. model):  0.7878 </span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic (proj. model): 211.9 on 1 and 46 DF,  p-value: &lt; 2.2e-16</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             Estimate Std. Error t value  Pr(&gt;|t|) CI Lower CI Upper  DF</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)   0.2081    0.01814   11.47 7.493e-22   0.1723   0.2440 139</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate      0.6155    0.04391   14.02 2.244e-28   0.5287   0.7023 139</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.5336 ,    Adjusted R-squared:  0.5302 </span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 196.5 on 1 and 139 DF,  p-value: &lt; 2.2e-16</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p><strong>結果の解釈</strong>：cap.rate の係数は約 <strong>0.615</strong> で、1%水準で有意です。これは「資本率（保育所整備率）が1ポイント上がると、雇用率が約0.615ポイント上がる」という正の相関を示しています。ただし、この段階では因果関係とは言えません。</p>
+</section>
+<section id="モデル2-都道府県固定効果" class="level3" data-number="2.4">
+<h3 data-number="2.4" class="anchored" data-anchor-id="モデル2-都道府県固定効果"><span class="header-section-number">2.4</span> モデル2: 都道府県固定効果</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル3: 年の固定効果</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>fm3 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル2: クラスタリングと都道府県固定効果</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>fm2 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  emp.rate <span class="sc">~</span> cap.rate,</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> yamaguchi,</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">se_type =</span> <span class="st">"stata"</span>,</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">clusters =</span> pref,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed_effects =</span> year</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed_effects =</span> pref</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm3)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm2)</span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm_robust(formula = emp.rate ~ cap.rate, data = yamaguchi, clusters = pref, </span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     fixed_effects = year, se_type = "stata")</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     fixed_effects = pref, se_type = "stata")</span></span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  stata </span></span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          Estimate Std. Error t value  Pr(&gt;|t|) CI Lower CI Upper DF</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate   0.5848    0.07302    8.01 2.864e-10   0.4378   0.7318 46</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate   0.8051    0.05531   14.56 7.736e-19   0.6938   0.9164 46</span></span>
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.5461 ,    Adjusted R-squared:  0.5361</span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared (proj. model):  0.4897 ,  Adjusted R-squared (proj. model):  0.4785 </span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic (proj. model): 64.15 on 1 and 46 DF,  p-value: 2.864e-10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.9836 ,    Adjusted R-squared:  0.9754</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared (proj. model):  0.859 ,   Adjusted R-squared (proj. model):  0.7878 </span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic (proj. model): 211.9 on 1 and 46 DF,  p-value: &lt; 2.2e-16</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p><strong>結果の解釈</strong>：都道府県固定効果を入れると、cap.rate の係数は約 <strong>0.805</strong> に上昇し、依然として1%水準で有意です。これは各県固有の特性（産業構造、文化など）をコントロールした上でも、保育所整備と雇用率の間に強い正の関係があることを示しています。</p>
+</section>
+<section id="モデル3-年固定効果" class="level3" data-number="2.5">
+<h3 data-number="2.5" class="anchored" data-anchor-id="モデル3-年固定効果"><span class="header-section-number">2.5</span> モデル3: 年固定効果</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル4: 都道府県 + 年 の固定効果</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>fm4 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル3: 年の固定効果</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>fm3 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  emp.rate <span class="sc">~</span> cap.rate,</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> yamaguchi,</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">se_type =</span> <span class="st">"stata"</span>,</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">clusters =</span> pref,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed_effects =</span> pref <span class="sc">+</span> year</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed_effects =</span> year</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm4)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm3)</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm_robust(formula = emp.rate ~ cap.rate, data = yamaguchi, clusters = pref, </span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     fixed_effects = pref + year, se_type = "stata")</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     fixed_effects = year, se_type = "stata")</span></span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  stata </span></span>
 <span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          Estimate Std. Error t value Pr(&gt;|t|) CI Lower CI Upper DF</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate  0.09032    0.07357   1.228   0.2258 -0.05776   0.2384 46</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          Estimate Std. Error t value  Pr(&gt;|t|) CI Lower CI Upper DF</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate   0.5848    0.07302    8.01 2.864e-10   0.4378   0.7318 46</span></span>
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.9946 ,    Adjusted R-squared:  0.9917</span></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared (proj. model):  0.02776 , Adjusted R-squared (proj. model):  -0.4958 </span></span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic (proj. model): 1.507 on 1 and 46 DF,  p-value: 0.2258</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.5461 ,    Adjusted R-squared:  0.5361</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared (proj. model):  0.4897 ,  Adjusted R-squared (proj. model):  0.4785 </span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic (proj. model): 64.15 on 1 and 46 DF,  p-value: 2.864e-10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p><strong>結果の解釈</strong>：年固定効果のみを入れた場合、cap.rate の係数は約 <strong>0.585</strong> で有意です。全国共通の時間トレンド（景気変動など）を除去しても正の関係が残っています。</p>
+</section>
+<section id="モデル4-都道府県-年-の二元固定効果two-way-fe" class="level3" data-number="2.6">
+<h3 data-number="2.6" class="anchored" data-anchor-id="モデル4-都道府県-年-の二元固定効果two-way-fe"><span class="header-section-number">2.6</span> モデル4: 都道府県 + 年 の二元固定効果（Two-way FE）</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル5: 制御変数を追加（年固定効果）</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fm5 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  emp.rate <span class="sc">~</span> cap.rate <span class="sc">+</span> age <span class="sc">+</span> age.hus <span class="sc">+</span> emp.rate.hus <span class="sc">+</span> urate,</span>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル4: 都道府県 + 年 の固定効果</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fm4 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  emp.rate <span class="sc">~</span> cap.rate,</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> yamaguchi,</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">se_type =</span> <span class="st">"stata"</span>,</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">clusters =</span> pref,</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed_effects =</span> year</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed_effects =</span> pref <span class="sc">+</span> year</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm5)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm4)</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm_robust(formula = emp.rate ~ cap.rate + age + age.hus + emp.rate.hus + </span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     urate, data = yamaguchi, clusters = pref, fixed_effects = year, </span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     se_type = "stata")</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  stata </span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               Estimate Std. Error  t value  Pr(&gt;|t|) CI Lower CI Upper DF</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate      0.535270    0.06821  7.84698 4.976e-10   0.3980   0.6726 46</span></span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; age          -0.003658    0.09312 -0.03928 9.688e-01  -0.1911   0.1838 46</span></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; age.hus      -0.050556    0.08120 -0.62260 5.366e-01  -0.2140   0.1129 46</span></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; emp.rate.hus  0.065030    0.44035  0.14768 8.832e-01  -0.8214   0.9514 46</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; urate        -0.204517    1.05466 -0.19392 8.471e-01  -2.3274   1.9184 46</span></span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.5887 ,    Adjusted R-squared:  0.567</span></span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared (proj. model):  0.5376 ,  Adjusted R-squared (proj. model):  0.5132 </span></span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic (proj. model): 26.79 on 5 and 46 DF,  p-value: 1.395e-12</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm_robust(formula = emp.rate ~ cap.rate, data = yamaguchi, clusters = pref, </span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     fixed_effects = pref + year, se_type = "stata")</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  stata </span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          Estimate Std. Error t value Pr(&gt;|t|) CI Lower CI Upper DF</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate  0.09032    0.07357   1.228   0.2258 -0.05776   0.2384 46</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.9946 ,    Adjusted R-squared:  0.9917</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared (proj. model):  0.02776 , Adjusted R-squared (proj. model):  -0.4958 </span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic (proj. model): 1.507 on 1 and 46 DF,  p-value: 0.2258</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p><strong>結果の解釈（重要！）</strong>：都道府県と年の両方の固定効果を入れると、cap.rate の係数は約 <strong>0.090</strong> に大幅に低下し、<strong>統計的に有意ではなくなります</strong>（p値 = 0.226）。これは非常に重要な発見です。</p>
+<p><strong>なぜ係数が小さくなったのか？</strong><br>
+都道府県固定効果は「県ごとの平均的な違い」を、年固定効果は「全国共通の時間変化」を吸収します。両方を入れると、「ある県で、ある年に、他の県や年と比べて保育所が増えたとき、雇用率がどう変わるか」という、より厳密な因果関係に近い推定になります。その結果、単純なOLSで見られた強い正の相関の多くは、実は県固有の特性や全国的なトレンドによるものだった可能性があります。</p>
+</section>
+<section id="モデル5-制御変数を追加年固定効果" class="level3" data-number="2.7">
+<h3 data-number="2.7" class="anchored" data-anchor-id="モデル5-制御変数を追加年固定効果"><span class="header-section-number">2.7</span> モデル5: 制御変数を追加（年固定効果）</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル6: 制御変数を追加（都道府県+年 固定効果）</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fm6 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル5: 制御変数を追加（年固定効果）</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fm5 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  emp.rate <span class="sc">~</span> cap.rate <span class="sc">+</span> age <span class="sc">+</span> age.hus <span class="sc">+</span> emp.rate.hus <span class="sc">+</span> urate,</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> yamaguchi,</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">se_type =</span> <span class="st">"stata"</span>,</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">clusters =</span> pref,</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed_effects =</span> pref <span class="sc">+</span> year</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed_effects =</span> year</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm6)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm5)</span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm_robust(formula = emp.rate ~ cap.rate + age + age.hus + emp.rate.hus + </span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     urate, data = yamaguchi, clusters = pref, fixed_effects = pref + </span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     year, se_type = "stata")</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     urate, data = yamaguchi, clusters = pref, fixed_effects = year, </span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     se_type = "stata")</span></span>
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  stata </span></span>
 <span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|)  CI Lower CI Upper DF</span></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate      0.11402    0.07314  1.5590  0.12584 -0.033195  0.26124 46</span></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; age          -0.02661    0.03393 -0.7844  0.43681 -0.094905  0.04168 46</span></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; age.hus       0.04088    0.03341  1.2236  0.22732 -0.026366  0.10812 46</span></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; emp.rate.hus  0.31107    0.15765  1.9731  0.05451 -0.006268  0.62841 46</span></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; urate        -0.66126    0.30333 -2.1800  0.03441 -1.271829 -0.05070 46</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;               Estimate Std. Error  t value  Pr(&gt;|t|) CI Lower CI Upper DF</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate      0.535270    0.06821  7.84698 4.976e-10   0.3980   0.6726 46</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; age          -0.003658    0.09312 -0.03928 9.688e-01  -0.1911   0.1838 46</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; age.hus      -0.050556    0.08120 -0.62260 5.366e-01  -0.2140   0.1129 46</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; emp.rate.hus  0.065030    0.44035  0.14768 8.832e-01  -0.8214   0.9514 46</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; urate        -0.204517    1.05466 -0.19392 8.471e-01  -2.3274   1.9184 46</span></span>
 <span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.996 , Adjusted R-squared:  0.9936</span></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared (proj. model):  0.2848 ,  Adjusted R-squared (proj. model):  -0.1508 </span></span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic (proj. model): 2.468 on 5 and 46 DF,  p-value: 0.04618</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.5887 ,    Adjusted R-squared:  0.567</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared (proj. model):  0.5376 ,  Adjusted R-squared (proj. model):  0.5132 </span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic (proj. model): 26.79 on 5 and 46 DF,  p-value: 1.395e-12</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p><strong>結果の解釈</strong>：年固定効果に加えて、妻の年齢（age）、夫の年齢（age.hus）、夫の雇用率（emp.rate.hus）、失業率（urate）を制御変数として追加しました。cap.rate の係数は約 <strong>0.535</strong> で依然として有意です。制御変数を加えてもなお正の効果が確認されます。</p>
+</section>
+<section id="モデル6-制御変数を追加二元固定効果" class="level3" data-number="2.8">
+<h3 data-number="2.8" class="anchored" data-anchor-id="モデル6-制御変数を追加二元固定効果"><span class="header-section-number">2.8</span> モデル6: 制御変数を追加（二元固定効果）</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル6: 制御変数を追加（都道府県+年 固定効果）</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>fm6 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  emp.rate <span class="sc">~</span> cap.rate <span class="sc">+</span> age <span class="sc">+</span> age.hus <span class="sc">+</span> emp.rate.hus <span class="sc">+</span> urate,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> yamaguchi,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">se_type =</span> <span class="st">"stata"</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">clusters =</span> pref,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fixed_effects =</span> pref <span class="sc">+</span> year</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fm6)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm_robust(formula = emp.rate ~ cap.rate + age + age.hus + emp.rate.hus + </span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     urate, data = yamaguchi, clusters = pref, fixed_effects = pref + </span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     year, se_type = "stata")</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Standard error type:  stata </span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|)  CI Lower CI Upper DF</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cap.rate      0.11402    0.07314  1.5590  0.12584 -0.033195  0.26124 46</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; age          -0.02661    0.03393 -0.7844  0.43681 -0.094905  0.04168 46</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; age.hus       0.04088    0.03341  1.2236  0.22732 -0.026366  0.10812 46</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; emp.rate.hus  0.31107    0.15765  1.9731  0.05451 -0.006268  0.62841 46</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; urate        -0.66126    0.30333 -2.1800  0.03441 -1.271829 -0.05070 46</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.996 , Adjusted R-squared:  0.9936</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared (proj. model):  0.2848 ,  Adjusted R-squared (proj. model):  -0.1508 </span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic (proj. model): 2.468 on 5 and 46 DF,  p-value: 0.04618</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>結果の解釈</strong>：二元固定効果に制御変数を加えたモデルでは、cap.rate の係数は約 <strong>0.114</strong> で、やはり<strong>有意ではありません</strong>（p値 = 0.126）。一方、失業率（urate）は係数 <strong>-0.661</strong> で5%水準で有意です。これは「失業率が高い地域・時期ほど女性の雇用率が低い」という直感に合った結果です。</p>
+</section>
 </section>
 <section id="modelsummary-パッケージのインストールと読み込み" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="modelsummary-パッケージのインストールと読み込み"><span class="header-section-number">3</span> modelsummary パッケージのインストールと読み込み</h2>
+<p><code>modelsummary</code> パッケージは、回帰分析の結果を見やすい表形式で出力するためのツールです。複数のモデルを横に並べて比較したり、記述統計を作成したりできます。論文やレポートで使える高品質な表を簡単に作成できるため、実証分析では非常に便利です。</p>
+<p>主な機能：</p>
+<ul>
+<li><strong>modelsummary()</strong>：複数の回帰モデルを1つの表にまとめて比較</li>
+<li><strong>datasummary()</strong>：記述統計表の作成</li>
+<li><strong>coef_omit / gof_omit</strong>：不要な係数や適合度指標を非表示にするオプション</li>
+</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(modelsummary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(modelsummary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="記述統計主要変数" class="level3" data-number="3.1">
 <h3 data-number="3.1" class="anchored" data-anchor-id="記述統計主要変数"><span class="header-section-number">3.1</span> 記述統計（主要変数）</h3>
-<p>主要変数（雇用率・資本率・年齢など）の記述統計を示します。</p>
+<p>分析に使用する主要変数の記述統計を示します。141の観測値（47都道府県 × 3年＝2000年、2005年、2010年）があります。</p>
+<ul>
+<li><strong>emp.rate（母親就業率）</strong>：平均 0.431、標準偏差 0.097、範囲 0.229〜0.640。既婚女性の約43%が就業しています。</li>
+<li><strong>cap.rate（保育所定員率）</strong>：平均 0.363、標準偏差 0.115、範囲 0.138〜0.655。保育所の整備状況を表します。</li>
+<li><strong>age（母親平均年齢）</strong>：平均 32.730歳、標準偏差 0.670。</li>
+<li><strong>age.hus（父親平均年齢）</strong>：平均 34.834歳、標準偏差 0.531。</li>
+<li><strong>emp.rate.hus（父親就業率）</strong>：平均 0.965、標準偏差 0.018。父親のほとんど（約97%）が就業しています。</li>
+<li><strong>urate（失業率）</strong>：平均 0.057（5.7%）、標準偏差 0.015、範囲 0.030〜0.119。地域の労働市場の状況を反映します。</li>
+</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> yamaguchi <span class="sc">%&gt;%</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(emp.rate, cap.rate, age, age.hus, emp.rate.hus, urate)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>table63 <span class="ot">&lt;-</span> <span class="fu">datasummary</span>(</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">All</span>(vars) <span class="sc">~</span> N <span class="sc">+</span> Mean <span class="sc">+</span> SD <span class="sc">+</span> Min <span class="sc">+</span> Max,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> yamaguchi,</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">fmt =</span> <span class="dv">3</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>table63</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>vars <span class="ot">&lt;-</span> yamaguchi <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(emp.rate, cap.rate, age, age.hus, emp.rate.hus, urate)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>table63 <span class="ot">&lt;-</span> <span class="fu">datasummary</span>(</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">All</span>(vars) <span class="sc">~</span> N <span class="sc">+</span> Mean <span class="sc">+</span> SD <span class="sc">+</span> Min <span class="sc">+</span> Max,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> yamaguchi,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">output =</span> <span class="st">"data.frame"</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">fmt =</span> <span class="dv">3</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 表出力（フォーマット別に処理）</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>table63</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  N   Mean    SD    Min    Max</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1     emp.rate 141  0.431 0.097  0.229  0.640</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     cap.rate 141  0.363 0.115  0.138  0.655</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3          age 141 32.730 0.670 31.490 34.764</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4      age.hus 141 34.834 0.531 33.877 36.859</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 emp.rate.hus 141  0.965 0.018  0.878  0.989</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6        urate 141  0.057 0.015  0.030  0.119</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>日本語を反映させると以下になる。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(table63) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"変数"</span>, <span class="st">"サンプルサイズ"</span>, <span class="st">"平均"</span>, <span class="st">"標準偏差"</span>, <span class="st">"最小値"</span>, <span class="st">"最大値"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 変数名</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>table63[,<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"母親就業率"</span>, <span class="st">"保育所定員率"</span>, <span class="st">"母親平均年齢"</span>, <span class="st">"父親平均年齢"</span>, <span class="st">"父親就業率"</span>, <span class="st">"失業率"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 表を出力</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">gt</span>(table63)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<!-- preamble start -->
+<div>
+<div id="yylebgakfz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#yylebgakfz table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-    <script>
+#yylebgakfz thead, #yylebgakfz tbody, #yylebgakfz tfoot, #yylebgakfz tr, #yylebgakfz td, #yylebgakfz th {
+  border-style: none;
+}
 
-      function styleCell_d4c6om9ffq3xnk4jzo3s(i, j, css_id) {
-          var table = document.getElementById("tinytable_d4c6om9ffq3xnk4jzo3s");
-          var cell = table.rows[i]?.cells[j];  // Safe navigation to avoid errors
-          if (cell) {
-              console.log(`Styling cell at (${i}, ${j}) with class ${css_id}`);
-              cell.classList.add(css_id);
-          } else {
-              console.warn(`Cell at (${i}, ${j}) not found.`);
-          }
-      }
-      function insertSpanRow(i, colspan, content) {
-        var table = document.getElementById('tinytable_d4c6om9ffq3xnk4jzo3s');
-        var newRow = table.insertRow(i);
-        var newCell = newRow.insertCell(0);
-        newCell.setAttribute("colspan", colspan);
-        // newCell.innerText = content;
-        // this may be unsafe, but innerText does not interpret <br>
-        newCell.innerHTML = content;
-      }
-      function spanCell_d4c6om9ffq3xnk4jzo3s(i, j, rowspan, colspan) {
-        var table = document.getElementById("tinytable_d4c6om9ffq3xnk4jzo3s");
-        const targetRow = table.rows[i];
-        const targetCell = targetRow.cells[j];
-        for (let r = 0; r < rowspan; r++) {
-          // Only start deleting cells to the right for the first row (r == 0)
-          if (r === 0) {
-            // Delete cells to the right of the target cell in the first row
-            for (let c = colspan - 1; c > 0; c--) {
-              if (table.rows[i + r].cells[j + c]) {
-                table.rows[i + r].deleteCell(j + c);
-              }
-            }
-          }
-          // For rows below the first, delete starting from the target column
-          if (r > 0) {
-            for (let c = colspan - 1; c >= 0; c--) {
-              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
-                table.rows[i + r].deleteCell(j);
-              }
-            }
-          }
-        }
-        // Set rowspan and colspan of the target cell
-        targetCell.rowSpan = rowspan;
-        targetCell.colSpan = colspan;
-      }
-      // tinytable span after
-      window.addEventListener('load', function () {
-          var cellsToStyle = [
-            // tinytable style arrays after
-          { positions: [ { i: 0, j: 0 },  ], css_id: 'tinytable_css_swga7crqwow1iz4ni7o5',}, 
-          { positions: [ { i: 6, j: 2 }, { i: 6, j: 4 }, { i: 6, j: 1 }, { i: 6, j: 3 }, { i: 6, j: 5 },  ], css_id: 'tinytable_css_mc5fgs3lbi3fqvhjyf5u',}, 
-          { positions: [ { i: 6, j: 0 },  ], css_id: 'tinytable_css_i8gkvkct7lonpfmqnqoz',}, 
-          { positions: [ { i: 5, j: 1 }, { i: 5, j: 3 }, { i: 3, j: 1 }, { i: 4, j: 1 }, { i: 2, j: 2 }, { i: 3, j: 2 }, { i: 4, j: 2 }, { i: 5, j: 2 }, { i: 5, j: 4 }, { i: 1, j: 1 }, { i: 2, j: 1 }, { i: 2, j: 3 }, { i: 3, j: 3 }, { i: 4, j: 3 }, { i: 4, j: 5 }, { i: 5, j: 5 }, { i: 1, j: 2 }, { i: 1, j: 4 }, { i: 2, j: 4 }, { i: 3, j: 4 }, { i: 4, j: 4 }, { i: 2, j: 5 }, { i: 3, j: 5 }, { i: 1, j: 3 }, { i: 1, j: 5 },  ], css_id: 'tinytable_css_gywomuyhwfecffzwanyl',}, 
-          { positions: [ { i: 1, j: 0 }, { i: 2, j: 0 }, { i: 3, j: 0 }, { i: 4, j: 0 }, { i: 5, j: 0 },  ], css_id: 'tinytable_css_dsgv1n017s3jza023mzb',}, 
-          { positions: [ { i: 0, j: 1 }, { i: 0, j: 3 }, { i: 0, j: 5 }, { i: 0, j: 2 }, { i: 0, j: 4 },  ], css_id: 'tinytable_css_dguq7dckntr5lxlw4yzj',}, 
-          ];
+#yylebgakfz p {
+  margin: 0;
+  padding: 0;
+}
 
-          // Loop over the arrays to style the cells
-          cellsToStyle.forEach(function (group) {
-              group.positions.forEach(function (cell) {
-                  styleCell_d4c6om9ffq3xnk4jzo3s(cell.i, cell.j, group.css_id);
-              });
-          });
-      });
-    </script>
+#yylebgakfz .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
 
-    <style>
-      /* tinytable css entries after */
-      .table td.tinytable_css_swga7crqwow1iz4ni7o5, .table th.tinytable_css_swga7crqwow1iz4ni7o5 { text-align: left; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
-      .table td.tinytable_css_mc5fgs3lbi3fqvhjyf5u, .table th.tinytable_css_mc5fgs3lbi3fqvhjyf5u { text-align: right; border-bottom: solid #d3d8dc 0.1em; }
-      .table td.tinytable_css_i8gkvkct7lonpfmqnqoz, .table th.tinytable_css_i8gkvkct7lonpfmqnqoz { text-align: left; border-bottom: solid #d3d8dc 0.1em; }
-      .table td.tinytable_css_gywomuyhwfecffzwanyl, .table th.tinytable_css_gywomuyhwfecffzwanyl { text-align: right; }
-      .table td.tinytable_css_dsgv1n017s3jza023mzb, .table th.tinytable_css_dsgv1n017s3jza023mzb { text-align: left; }
-      .table td.tinytable_css_dguq7dckntr5lxlw4yzj, .table th.tinytable_css_dguq7dckntr5lxlw4yzj { text-align: right; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
-    </style>
-    <div class="container">
-      <table class="table table-borderless" id="tinytable_d4c6om9ffq3xnk4jzo3s" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
-        <thead>
-        
-              <tr>
-                <th scope="col"> </th>
-                <th scope="col">N</th>
-                <th scope="col">Mean</th>
-                <th scope="col">SD</th>
-                <th scope="col">Min</th>
-                <th scope="col">Max</th>
-              </tr>
-        </thead>
-        
-        <tbody>
-                <tr>
-                  <td>emp.rate</td>
-                  <td>141</td>
-                  <td>0.431</td>
-                  <td>0.097</td>
-                  <td>0.229</td>
-                  <td>0.640</td>
-                </tr>
-                <tr>
-                  <td>cap.rate</td>
-                  <td>141</td>
-                  <td>0.363</td>
-                  <td>0.115</td>
-                  <td>0.138</td>
-                  <td>0.655</td>
-                </tr>
-                <tr>
-                  <td>age</td>
-                  <td>141</td>
-                  <td>32.730</td>
-                  <td>0.670</td>
-                  <td>31.490</td>
-                  <td>34.764</td>
-                </tr>
-                <tr>
-                  <td>age.hus</td>
-                  <td>141</td>
-                  <td>34.834</td>
-                  <td>0.531</td>
-                  <td>33.877</td>
-                  <td>36.859</td>
-                </tr>
-                <tr>
-                  <td>emp.rate.hus</td>
-                  <td>141</td>
-                  <td>0.965</td>
-                  <td>0.018</td>
-                  <td>0.878</td>
-                  <td>0.989</td>
-                </tr>
-                <tr>
-                  <td>urate</td>
-                  <td>141</td>
-                  <td>0.057</td>
-                  <td>0.015</td>
-                  <td>0.030</td>
-                  <td>0.119</td>
-                </tr>
-        </tbody>
-      </table>
-    </div>
-<!-- hack to avoid NA insertion in last line -->
+#yylebgakfz .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#yylebgakfz .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#yylebgakfz .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#yylebgakfz .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#yylebgakfz .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yylebgakfz .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#yylebgakfz .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#yylebgakfz .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#yylebgakfz .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#yylebgakfz .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#yylebgakfz .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#yylebgakfz .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#yylebgakfz .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#yylebgakfz .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#yylebgakfz .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#yylebgakfz .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#yylebgakfz .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#yylebgakfz .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yylebgakfz .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#yylebgakfz .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#yylebgakfz .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#yylebgakfz .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yylebgakfz .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#yylebgakfz .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#yylebgakfz .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yylebgakfz .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yylebgakfz .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#yylebgakfz .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yylebgakfz .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#yylebgakfz .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yylebgakfz .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#yylebgakfz .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yylebgakfz .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#yylebgakfz .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yylebgakfz .gt_left {
+  text-align: left;
+}
+
+#yylebgakfz .gt_center {
+  text-align: center;
+}
+
+#yylebgakfz .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#yylebgakfz .gt_font_normal {
+  font-weight: normal;
+}
+
+#yylebgakfz .gt_font_bold {
+  font-weight: bold;
+}
+
+#yylebgakfz .gt_font_italic {
+  font-style: italic;
+}
+
+#yylebgakfz .gt_super {
+  font-size: 65%;
+}
+
+#yylebgakfz .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#yylebgakfz .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#yylebgakfz .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#yylebgakfz .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#yylebgakfz .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#yylebgakfz .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#yylebgakfz .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#yylebgakfz .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#yylebgakfz div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="header gt_col_headings">
+<th id="a変数" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">変数</th>
+<th id="aサンプルサイズ" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">サンプルサイズ</th>
+<th id="a平均" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">平均</th>
+<th id="a標準偏差" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">標準偏差</th>
+<th id="a最小値" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">最小値</th>
+<th id="a最大値" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">最大値</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="変数">母親就業率</td>
+<td class="gt_row gt_right" headers="サンプルサイズ">141</td>
+<td class="gt_row gt_right" headers="平均">0.431</td>
+<td class="gt_row gt_right" headers="標準偏差">0.097</td>
+<td class="gt_row gt_right" headers="最小値">0.229</td>
+<td class="gt_row gt_right" headers="最大値">0.640</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="変数">保育所定員率</td>
+<td class="gt_row gt_right" headers="サンプルサイズ">141</td>
+<td class="gt_row gt_right" headers="平均">0.363</td>
+<td class="gt_row gt_right" headers="標準偏差">0.115</td>
+<td class="gt_row gt_right" headers="最小値">0.138</td>
+<td class="gt_row gt_right" headers="最大値">0.655</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="変数">母親平均年齢</td>
+<td class="gt_row gt_right" headers="サンプルサイズ">141</td>
+<td class="gt_row gt_right" headers="平均">32.730</td>
+<td class="gt_row gt_right" headers="標準偏差">0.670</td>
+<td class="gt_row gt_right" headers="最小値">31.490</td>
+<td class="gt_row gt_right" headers="最大値">34.764</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="変数">父親平均年齢</td>
+<td class="gt_row gt_right" headers="サンプルサイズ">141</td>
+<td class="gt_row gt_right" headers="平均">34.834</td>
+<td class="gt_row gt_right" headers="標準偏差">0.531</td>
+<td class="gt_row gt_right" headers="最小値">33.877</td>
+<td class="gt_row gt_right" headers="最大値">36.859</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="変数">父親就業率</td>
+<td class="gt_row gt_right" headers="サンプルサイズ">141</td>
+<td class="gt_row gt_right" headers="平均">0.965</td>
+<td class="gt_row gt_right" headers="標準偏差">0.018</td>
+<td class="gt_row gt_right" headers="最小値">0.878</td>
+<td class="gt_row gt_right" headers="最大値">0.989</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="変数">失業率</td>
+<td class="gt_row gt_right" headers="サンプルサイズ">141</td>
+<td class="gt_row gt_right" headers="平均">0.057</td>
+<td class="gt_row gt_right" headers="標準偏差">0.015</td>
+<td class="gt_row gt_right" headers="最小値">0.030</td>
+<td class="gt_row gt_right" headers="最大値">0.119</td>
+</tr>
+</tbody>
+</table>
+
 </div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>table64 <span class="ot">&lt;-</span> <span class="fu">datasummary</span>(emp.rate <span class="sc">*</span> (Mean <span class="sc">+</span> SD) <span class="sc">+</span> cap.rate <span class="sc">*</span> (Mean <span class="sc">+</span> SD) <span class="sc">~</span> <span class="fu">factor</span>(year),</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">output =</span> <span class="st">"data.frame"</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> yamaguchi,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">fmt =</span> <span class="dv">3</span>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>table64</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  2000  2005  2010</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 emp.rate Mean 0.392 0.430 0.471</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2            SD 0.096 0.091 0.090</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 cap.rate Mean 0.320 0.361 0.407</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4            SD 0.102 0.110 0.119</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </div>
 </section>
-<section id="回帰結果の表定数項を表示しない" class="level3" data-number="3.2">
-<h3 data-number="3.2" class="anchored" data-anchor-id="回帰結果の表定数項を表示しない"><span class="header-section-number">3.2</span> 回帰結果の表（定数項を表示しない）</h3>
+<section id="年別記述統計主要変数" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="年別記述統計主要変数"><span class="header-section-number">3.2</span> 年別記述統計（主要変数）</h3>
+<p>母親就業率と保育所定員率の年別推移を示します。2000年から2010年にかけて、両変数とも増加傾向にあることがわかります。</p>
+<ul>
+<li><strong>母親就業率</strong>：2000年の平均 0.392 → 2005年 0.430 → 2010年 0.471 と、10年間で約8ポイント上昇。</li>
+<li><strong>保育所定員率</strong>：2000年の平均 0.320 → 2005年 0.361 → 2010年 0.407 と、同様に約9ポイント上昇。</li>
+</ul>
+<p>この時系列的な共変動が、単純OLSで強い正の相関が見られる一因と考えられます。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>table64 <span class="ot">&lt;-</span> <span class="fu">datasummary</span>(emp.rate <span class="sc">*</span> (Mean <span class="sc">+</span> SD) <span class="sc">+</span> cap.rate <span class="sc">*</span> (Mean <span class="sc">+</span> SD) <span class="sc">~</span> <span class="fu">factor</span>(year),</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> yamaguchi,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">output =</span> <span class="st">"data.frame"</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">fmt =</span> <span class="dv">3</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>table64            </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  2000  2005  2010</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 emp.rate Mean 0.392 0.430 0.471</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2            SD 0.096 0.091 0.090</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 cap.rate Mean 0.320 0.361 0.407</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4            SD 0.102 0.110 0.119</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>日本語を反映させると以下になる。</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 列名</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(table64) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">" "</span>, <span class="st">"変数"</span>, <span class="st">"2000"</span>, <span class="st">"2005"</span>, <span class="st">"2010"</span>) <span class="co"># tibbleの都合上1列目は空白1文字とする</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 変数名</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>table64[,<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"母親就業率"</span>, <span class="st">""</span>, <span class="st">"保育所定員率"</span>, <span class="st">""</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 統計量を日本語に直す</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>table64[,<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"平均"</span>, <span class="st">"標準偏差"</span>, <span class="st">"平均"</span>, <span class="st">"標準偏差"</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 表を出力</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">gt</span>(table64)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<div id="zdsisgcmtw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#zdsisgcmtw table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#zdsisgcmtw thead, #zdsisgcmtw tbody, #zdsisgcmtw tfoot, #zdsisgcmtw tr, #zdsisgcmtw td, #zdsisgcmtw th {
+  border-style: none;
+}
+
+#zdsisgcmtw p {
+  margin: 0;
+  padding: 0;
+}
+
+#zdsisgcmtw .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#zdsisgcmtw .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#zdsisgcmtw .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#zdsisgcmtw .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#zdsisgcmtw .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#zdsisgcmtw .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zdsisgcmtw .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#zdsisgcmtw .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#zdsisgcmtw .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#zdsisgcmtw .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#zdsisgcmtw .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#zdsisgcmtw .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#zdsisgcmtw .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#zdsisgcmtw .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#zdsisgcmtw .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#zdsisgcmtw .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#zdsisgcmtw .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#zdsisgcmtw .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#zdsisgcmtw .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zdsisgcmtw .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#zdsisgcmtw .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#zdsisgcmtw .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#zdsisgcmtw .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zdsisgcmtw .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#zdsisgcmtw .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#zdsisgcmtw .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zdsisgcmtw .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zdsisgcmtw .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#zdsisgcmtw .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zdsisgcmtw .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#zdsisgcmtw .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#zdsisgcmtw .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#zdsisgcmtw .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zdsisgcmtw .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#zdsisgcmtw .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#zdsisgcmtw .gt_left {
+  text-align: left;
+}
+
+#zdsisgcmtw .gt_center {
+  text-align: center;
+}
+
+#zdsisgcmtw .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#zdsisgcmtw .gt_font_normal {
+  font-weight: normal;
+}
+
+#zdsisgcmtw .gt_font_bold {
+  font-weight: bold;
+}
+
+#zdsisgcmtw .gt_font_italic {
+  font-style: italic;
+}
+
+#zdsisgcmtw .gt_super {
+  font-size: 65%;
+}
+
+#zdsisgcmtw .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#zdsisgcmtw .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#zdsisgcmtw .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#zdsisgcmtw .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#zdsisgcmtw .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#zdsisgcmtw .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#zdsisgcmtw .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#zdsisgcmtw .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#zdsisgcmtw div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="header gt_col_headings">
+<th id="a-" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col"></th>
+<th id="a変数" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">変数</th>
+<th id="a2000" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">2000</th>
+<th id="a2005" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">2005</th>
+<th id="a2010" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">2010</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers=" ">母親就業率</td>
+<td class="gt_row gt_left" headers="変数">平均</td>
+<td class="gt_row gt_right" headers="2000">0.392</td>
+<td class="gt_row gt_right" headers="2005">0.430</td>
+<td class="gt_row gt_right" headers="2010">0.471</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers=" "></td>
+<td class="gt_row gt_left" headers="変数">標準偏差</td>
+<td class="gt_row gt_right" headers="2000">0.096</td>
+<td class="gt_row gt_right" headers="2005">0.091</td>
+<td class="gt_row gt_right" headers="2010">0.090</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers=" ">保育所定員率</td>
+<td class="gt_row gt_left" headers="変数">平均</td>
+<td class="gt_row gt_right" headers="2000">0.320</td>
+<td class="gt_row gt_right" headers="2005">0.361</td>
+<td class="gt_row gt_right" headers="2010">0.407</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers=" "></td>
+<td class="gt_row gt_left" headers="変数">標準偏差</td>
+<td class="gt_row gt_right" headers="2000">0.102</td>
+<td class="gt_row gt_right" headers="2005">0.110</td>
+<td class="gt_row gt_right" headers="2010">0.119</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="回帰結果の表定数項を表示しない" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="回帰結果の表定数項を表示しない"><span class="header-section-number">3.3</span> 回帰結果の表（定数項を表示しない）</h3>
 <p>下の表は6つのモデルを横に並べて比較したものです。<code>coef_omit</code> により定数項（Intercept）は表示していません。</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(modelsummary)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>models <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(1)"</span>]] <span class="ot">&lt;-</span> fm1</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(2)"</span>]] <span class="ot">&lt;-</span> fm2</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(3)"</span>]] <span class="ot">&lt;-</span> fm3</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(4)"</span>]] <span class="ot">&lt;-</span> fm4</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(5)"</span>]] <span class="ot">&lt;-</span> fm5</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(6)"</span>]] <span class="ot">&lt;-</span> fm6</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>table65<span class="ot">&lt;-</span><span class="fu">modelsummary</span>(</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  models,</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">stars =</span> <span class="fu">c</span>(<span class="st">`</span><span class="at">***</span><span class="st">`</span> <span class="ot">=</span> <span class="fl">0.01</span>, <span class="st">`</span><span class="at">**</span><span class="st">`</span> <span class="ot">=</span> <span class="fl">0.05</span>, <span class="st">`</span><span class="at">*</span><span class="st">`</span> <span class="ot">=</span> <span class="fl">0.1</span>),</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">gof_omit =</span> <span class="st">"IC|Log|AIC|BIC|RMSE|Within|Pseudo|Std.Errors"</span>,</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_omit =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">(Intercept</span><span class="sc">\\</span><span class="st">)"</span>,</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">fmt =</span> <span class="dv">3</span></span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>table65</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>models <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(1)"</span>]] <span class="ot">&lt;-</span> fm1</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(2)"</span>]] <span class="ot">&lt;-</span> fm2</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(3)"</span>]] <span class="ot">&lt;-</span> fm3</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(4)"</span>]] <span class="ot">&lt;-</span> fm4</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(5)"</span>]] <span class="ot">&lt;-</span> fm5</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>models[[<span class="st">"(6)"</span>]] <span class="ot">&lt;-</span> fm6</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>table65 <span class="ot">&lt;-</span> <span class="fu">modelsummary</span>(</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  models,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">stars =</span> <span class="fu">c</span>(<span class="st">`</span><span class="at">***</span><span class="st">`</span> <span class="ot">=</span> <span class="fl">0.01</span>, <span class="st">`</span><span class="at">**</span><span class="st">`</span> <span class="ot">=</span> <span class="fl">0.05</span>, <span class="st">`</span><span class="at">*</span><span class="st">`</span> <span class="ot">=</span> <span class="fl">0.1</span>),</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">gof_omit =</span> <span class="st">"IC|Log|AIC|BIC|RMSE|Within|Pseudo|Std.Errors"</span>,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_omit =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">(Intercept</span><span class="sc">\\</span><span class="st">)"</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">output=</span> <span class="st">"markdown"</span>,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_map =</span> <span class="fu">c</span>(</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cap.rate"</span> <span class="ot">=</span> <span class="st">"保育所定員率"</span>,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"age"</span> <span class="ot">=</span> <span class="st">"母親平均年齢"</span>,</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"age.hus"</span> <span class="ot">=</span> <span class="st">"父親平均年齢"</span>,</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"emp.rate.hus"</span> <span class="ot">=</span> <span class="st">"父親就業率"</span>,</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"urate"</span> <span class="ot">=</span> <span class="st">"失業率"</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">fmt =</span> <span class="dv">3</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>table65</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <!-- preamble start -->
 
     <script>
 
-      function styleCell_g5apc6r64xck6y1v2yt3(i, j, css_id) {
-          var table = document.getElementById("tinytable_g5apc6r64xck6y1v2yt3");
+      function styleCell_9tkd6mhqq8q1e08bz4go(i, j, css_id) {
+          var table = document.getElementById("tinytable_9tkd6mhqq8q1e08bz4go");
           var cell = table.rows[i]?.cells[j];  // Safe navigation to avoid errors
           if (cell) {
               console.log(`Styling cell at (${i}, ${j}) with class ${css_id}`);
@@ -527,7 +1514,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           }
       }
       function insertSpanRow(i, colspan, content) {
-        var table = document.getElementById('tinytable_g5apc6r64xck6y1v2yt3');
+        var table = document.getElementById('tinytable_9tkd6mhqq8q1e08bz4go');
         var newRow = table.insertRow(i);
         var newCell = newRow.insertCell(0);
         newCell.setAttribute("colspan", colspan);
@@ -535,8 +1522,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         // this may be unsafe, but innerText does not interpret <br>
         newCell.innerHTML = content;
       }
-      function spanCell_g5apc6r64xck6y1v2yt3(i, j, rowspan, colspan) {
-        var table = document.getElementById("tinytable_g5apc6r64xck6y1v2yt3");
+      function spanCell_9tkd6mhqq8q1e08bz4go(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_9tkd6mhqq8q1e08bz4go");
         const targetRow = table.rows[i];
         const targetCell = targetRow.cells[j];
         for (let r = 0; r < rowspan; r++) {
@@ -566,20 +1553,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       window.addEventListener('load', function () {
           var cellsToStyle = [
             // tinytable style arrays after
-          { positions: [ { i: 10, j: 6 }, { i: 10, j: 4 }, { i: 10, j: 5 }, { i: 10, j: 1 }, { i: 10, j: 2 }, { i: 10, j: 3 },  ], css_id: 'tinytable_css_xkutthczhs76u96d80ql',}, 
-          { positions: [ { i: 10, j: 0 },  ], css_id: 'tinytable_css_rbc4vdbv4nzhknj6ulgj',}, 
-          { positions: [ { i: 0, j: 0 },  ], css_id: 'tinytable_css_qkmv6bsi4a4lh0nzhbhm',}, 
-          { positions: [ { i: 13, j: 0 },  ], css_id: 'tinytable_css_g39nkhzrgvexwb5ak237',}, 
-          { positions: [ { i: 6, j: 1 }, { i: 7, j: 1 }, { i: 8, j: 1 }, { i: 9, j: 1 }, { i: 9, j: 2 }, { i: 11, j: 1 }, { i: 12, j: 1 }, { i: 12, j: 2 }, { i: 1, j: 1 }, { i: 2, j: 1 }, { i: 3, j: 1 }, { i: 4, j: 1 }, { i: 5, j: 1 }, { i: 5, j: 2 }, { i: 6, j: 2 }, { i: 7, j: 2 }, { i: 8, j: 2 }, { i: 8, j: 3 }, { i: 9, j: 3 }, { i: 11, j: 2 }, { i: 11, j: 3 }, { i: 12, j: 3 }, { i: 1, j: 2 }, { i: 2, j: 2 }, { i: 3, j: 2 }, { i: 4, j: 2 }, { i: 4, j: 3 }, { i: 5, j: 3 }, { i: 6, j: 3 }, { i: 7, j: 3 }, { i: 7, j: 4 }, { i: 8, j: 4 }, { i: 9, j: 4 }, { i: 9, j: 5 }, { i: 11, j: 4 }, { i: 12, j: 4 }, { i: 1, j: 3 }, { i: 2, j: 3 }, { i: 3, j: 3 }, { i: 3, j: 4 }, { i: 4, j: 4 }, { i: 5, j: 4 }, { i: 6, j: 4 }, { i: 6, j: 5 }, { i: 7, j: 5 }, { i: 8, j: 5 }, { i: 8, j: 6 }, { i: 9, j: 6 }, { i: 11, j: 5 }, { i: 12, j: 5 }, { i: 1, j: 4 }, { i: 2, j: 4 }, { i: 2, j: 5 }, { i: 3, j: 5 }, { i: 4, j: 5 }, { i: 5, j: 5 }, { i: 5, j: 6 }, { i: 6, j: 6 }, { i: 7, j: 6 }, { i: 12, j: 6 }, { i: 1, j: 5 }, { i: 1, j: 6 }, { i: 11, j: 6 }, { i: 3, j: 6 }, { i: 4, j: 6 }, { i: 2, j: 6 },  ], css_id: 'tinytable_css_broro6c1c4s0fk5v63bi',}, 
-          { positions: [ { i: 1, j: 0 }, { i: 2, j: 0 }, { i: 3, j: 0 }, { i: 4, j: 0 }, { i: 5, j: 0 }, { i: 6, j: 0 }, { i: 7, j: 0 }, { i: 8, j: 0 }, { i: 9, j: 0 }, { i: 11, j: 0 }, { i: 12, j: 0 },  ], css_id: 'tinytable_css_8cpmlzkbtgsxiscvqqmd',}, 
-          { positions: [ { i: 0, j: 1 }, { i: 0, j: 2 }, { i: 0, j: 3 }, { i: 0, j: 4 }, { i: 0, j: 5 }, { i: 0, j: 6 },  ], css_id: 'tinytable_css_6xug5gfn2uty34bqi4zz',}, 
-          { positions: [ { i: 13, j: 1 }, { i: 13, j: 2 }, { i: 13, j: 3 }, { i: 13, j: 4 }, { i: 13, j: 5 }, { i: 13, j: 6 },  ], css_id: 'tinytable_css_1v87z75c8unauukpf9q3',}, 
+          { positions: [ { i: 0, j: 1 }, { i: 0, j: 2 }, { i: 0, j: 3 }, { i: 0, j: 4 }, { i: 0, j: 5 }, { i: 0, j: 6 },  ], css_id: 'tinytable_css_seir0lw1om8j35gvnanz',}, 
+          { positions: [ { i: 6, j: 1 }, { i: 7, j: 1 }, { i: 8, j: 1 }, { i: 9, j: 1 }, { i: 9, j: 2 }, { i: 11, j: 1 }, { i: 12, j: 1 }, { i: 12, j: 2 }, { i: 1, j: 1 }, { i: 2, j: 1 }, { i: 3, j: 1 }, { i: 4, j: 1 }, { i: 5, j: 1 }, { i: 5, j: 2 }, { i: 6, j: 2 }, { i: 7, j: 2 }, { i: 8, j: 2 }, { i: 8, j: 3 }, { i: 9, j: 3 }, { i: 11, j: 2 }, { i: 11, j: 3 }, { i: 12, j: 3 }, { i: 1, j: 2 }, { i: 2, j: 2 }, { i: 3, j: 2 }, { i: 4, j: 2 }, { i: 4, j: 3 }, { i: 5, j: 3 }, { i: 6, j: 3 }, { i: 7, j: 3 }, { i: 7, j: 4 }, { i: 8, j: 4 }, { i: 9, j: 4 }, { i: 9, j: 5 }, { i: 11, j: 4 }, { i: 12, j: 4 }, { i: 1, j: 3 }, { i: 2, j: 3 }, { i: 3, j: 3 }, { i: 3, j: 4 }, { i: 4, j: 4 }, { i: 5, j: 4 }, { i: 6, j: 4 }, { i: 6, j: 5 }, { i: 7, j: 5 }, { i: 8, j: 5 }, { i: 8, j: 6 }, { i: 9, j: 6 }, { i: 11, j: 5 }, { i: 12, j: 5 }, { i: 1, j: 4 }, { i: 2, j: 4 }, { i: 2, j: 5 }, { i: 3, j: 5 }, { i: 4, j: 5 }, { i: 5, j: 5 }, { i: 5, j: 6 }, { i: 6, j: 6 }, { i: 7, j: 6 }, { i: 12, j: 6 }, { i: 1, j: 5 }, { i: 1, j: 6 }, { i: 11, j: 6 }, { i: 3, j: 6 }, { i: 4, j: 6 }, { i: 2, j: 6 },  ], css_id: 'tinytable_css_rhfvp5w52d6agaj6pddb',}, 
+          { positions: [ { i: 10, j: 6 }, { i: 10, j: 4 }, { i: 10, j: 5 }, { i: 10, j: 1 }, { i: 10, j: 2 }, { i: 10, j: 3 },  ], css_id: 'tinytable_css_p76ta7ya8u23coahv5uf',}, 
+          { positions: [ { i: 10, j: 0 },  ], css_id: 'tinytable_css_n51xofgeptl0xhzkex2l',}, 
+          { positions: [ { i: 13, j: 1 }, { i: 13, j: 2 }, { i: 13, j: 3 }, { i: 13, j: 4 }, { i: 13, j: 5 }, { i: 13, j: 6 },  ], css_id: 'tinytable_css_mtq05xs5s179r6zdy6er',}, 
+          { positions: [ { i: 13, j: 0 },  ], css_id: 'tinytable_css_h6odjf8izp2bxzapwcpx',}, 
+          { positions: [ { i: 0, j: 0 },  ], css_id: 'tinytable_css_ehe8l67tpu8wmo6rmatt',}, 
+          { positions: [ { i: 1, j: 0 }, { i: 2, j: 0 }, { i: 3, j: 0 }, { i: 4, j: 0 }, { i: 5, j: 0 }, { i: 6, j: 0 }, { i: 7, j: 0 }, { i: 8, j: 0 }, { i: 9, j: 0 }, { i: 11, j: 0 }, { i: 12, j: 0 },  ], css_id: 'tinytable_css_9zcqhgobo9aecjsxnq07',}, 
           ];
 
           // Loop over the arrays to style the cells
           cellsToStyle.forEach(function (group) {
               group.positions.forEach(function (cell) {
-                  styleCell_g5apc6r64xck6y1v2yt3(cell.i, cell.j, group.css_id);
+                  styleCell_9tkd6mhqq8q1e08bz4go(cell.i, cell.j, group.css_id);
               });
           });
       });
@@ -587,17 +1574,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
     <style>
       /* tinytable css entries after */
-      .table td.tinytable_css_xkutthczhs76u96d80ql, .table th.tinytable_css_xkutthczhs76u96d80ql { text-align: center; border-bottom: solid black 0.05em; }
-      .table td.tinytable_css_rbc4vdbv4nzhknj6ulgj, .table th.tinytable_css_rbc4vdbv4nzhknj6ulgj { text-align: left; border-bottom: solid black 0.05em; }
-      .table td.tinytable_css_qkmv6bsi4a4lh0nzhbhm, .table th.tinytable_css_qkmv6bsi4a4lh0nzhbhm { text-align: left; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
-      .table td.tinytable_css_g39nkhzrgvexwb5ak237, .table th.tinytable_css_g39nkhzrgvexwb5ak237 { text-align: left; border-bottom: solid #d3d8dc 0.1em; }
-      .table td.tinytable_css_broro6c1c4s0fk5v63bi, .table th.tinytable_css_broro6c1c4s0fk5v63bi { text-align: center; }
-      .table td.tinytable_css_8cpmlzkbtgsxiscvqqmd, .table th.tinytable_css_8cpmlzkbtgsxiscvqqmd { text-align: left; }
-      .table td.tinytable_css_6xug5gfn2uty34bqi4zz, .table th.tinytable_css_6xug5gfn2uty34bqi4zz { text-align: center; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
-      .table td.tinytable_css_1v87z75c8unauukpf9q3, .table th.tinytable_css_1v87z75c8unauukpf9q3 { text-align: center; border-bottom: solid #d3d8dc 0.1em; }
+      .table td.tinytable_css_seir0lw1om8j35gvnanz, .table th.tinytable_css_seir0lw1om8j35gvnanz { text-align: center; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+      .table td.tinytable_css_rhfvp5w52d6agaj6pddb, .table th.tinytable_css_rhfvp5w52d6agaj6pddb { text-align: center; }
+      .table td.tinytable_css_p76ta7ya8u23coahv5uf, .table th.tinytable_css_p76ta7ya8u23coahv5uf { text-align: center; border-bottom: solid black 0.05em; }
+      .table td.tinytable_css_n51xofgeptl0xhzkex2l, .table th.tinytable_css_n51xofgeptl0xhzkex2l { text-align: left; border-bottom: solid black 0.05em; }
+      .table td.tinytable_css_mtq05xs5s179r6zdy6er, .table th.tinytable_css_mtq05xs5s179r6zdy6er { text-align: center; border-bottom: solid #d3d8dc 0.1em; }
+      .table td.tinytable_css_h6odjf8izp2bxzapwcpx, .table th.tinytable_css_h6odjf8izp2bxzapwcpx { text-align: left; border-bottom: solid #d3d8dc 0.1em; }
+      .table td.tinytable_css_ehe8l67tpu8wmo6rmatt, .table th.tinytable_css_ehe8l67tpu8wmo6rmatt { text-align: left; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+      .table td.tinytable_css_9zcqhgobo9aecjsxnq07, .table th.tinytable_css_9zcqhgobo9aecjsxnq07 { text-align: left; }
     </style>
     <div class="container">
-      <table class="table table-borderless" id="tinytable_g5apc6r64xck6y1v2yt3" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+      <table class="table table-borderless" id="tinytable_9tkd6mhqq8q1e08bz4go" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
         <thead>
         
               <tr>
@@ -613,7 +1600,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <tfoot><tr><td colspan="7">* p &lt; 0.1, ** p &lt; 0.05, *** p &lt; 0.01</td></tr></tfoot>
         <tbody>
                 <tr>
-                  <td>cap.rate</td>
+                  <td>保育所定員率</td>
                   <td>0.615***</td>
                   <td>0.805***</td>
                   <td>0.585***</td>
@@ -631,7 +1618,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
                   <td>(0.073)</td>
                 </tr>
                 <tr>
-                  <td>age</td>
+                  <td>母親平均年齢</td>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -649,7 +1636,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
                   <td>(0.034)</td>
                 </tr>
                 <tr>
-                  <td>age.hus</td>
+                  <td>父親平均年齢</td>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -667,7 +1654,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
                   <td>(0.033)</td>
                 </tr>
                 <tr>
-                  <td>emp.rate.hus</td>
+                  <td>父親就業率</td>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -685,7 +1672,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
                   <td>(0.158)</td>
                 </tr>
                 <tr>
-                  <td>urate</td>
+                  <td>失業率</td>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -733,17 +1720,71 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       </table>
     </div>
 <!-- hack to avoid NA insertion in last line -->
-</div>
-</div>
 </section>
 </section>
 <section id="簡単な解釈" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="簡単な解釈"><span class="header-section-number">4</span> 簡単な解釈</h2>
-<ul>
-<li>モデル間でcap.rate（資本率）の係数がどのように変化するかを確認してください。</li>
-<li>固定効果や追加の制御変数を入れると係数の大きさや有意性がどのように変わるかが教育的に重要なポイントです。</li>
-</ul>
+<section id="分析結果のまとめ" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="分析結果のまとめ"><span class="header-section-number">4.1</span> 分析結果のまとめ</h3>
+<table class="table">
+<thead>
+<tr class="header">
+<th>モデル</th>
+<th>cap.rate係数</th>
+<th>有意性</th>
+<th>固定効果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>(1) 単純OLS</td>
+<td>0.615</td>
+<td>***</td>
+<td>なし</td>
+</tr>
+<tr class="even">
+<td>(2) 県FE</td>
+<td>0.805</td>
+<td>***</td>
+<td>都道府県</td>
+</tr>
+<tr class="odd">
+<td>(3) 年FE</td>
+<td>0.585</td>
+<td>***</td>
+<td>年</td>
+</tr>
+<tr class="even">
+<td>(4) 二元FE</td>
+<td>0.090</td>
+<td>n.s.</td>
+<td>都道府県+年</td>
+</tr>
+<tr class="odd">
+<td>(5) 年FE+制御変数</td>
+<td>0.535</td>
+<td>***</td>
+<td>年</td>
+</tr>
+<tr class="even">
+<td>(6) 二元FE+制御変数</td>
+<td>0.114</td>
+<td>n.s.</td>
+<td>都道府県+年</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="教育的ポイント" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="教育的ポイント"><span class="header-section-number">4.2</span> 教育的ポイント</h3>
+<ol type="1">
+<li><p><strong>固定効果の重要性</strong>：単純なOLSでは強い正の相関（0.615）が見られますが、二元固定効果を入れると効果は消えます（0.090、有意でない）。これは「見かけの相関」と「因果関係」の違いを示す好例です。</p></li>
+<li><p><strong>欠落変数バイアス（Omitted Variable Bias）</strong>：県の特性や時間トレンドをコントロールしないと、推定にバイアスが生じます。例えば、「女性の就業意欲が高い県は保育所も充実している」という場合、保育所の効果を過大評価してしまいます。</p></li>
+<li><p><strong>クラスター標準誤差</strong>：パネルデータでは同一個体（ここでは都道府県）内で誤差が相関している可能性があるため、クラスター頑健標準誤差を使うことが重要です。</p></li>
+<li><p><strong>政策的含意</strong>：この分析結果だけでは「保育所を増やしても女性の就業率は上がらない」とは結論づけられません。二元固定効果モデルは非常に厳しい条件での推定であり、効果がゼロというよりも「このデータ・手法では検出できなかった」という解釈が適切です。</p></li>
+</ol>
 <p>(注) 出力の形式や不要な係数をさらに除外したい場合は、<code>modelsummary()</code> の <code>coef_map</code> や <code>coef_omit</code> に正規表現を渡して調整してください。</p>
+</section>
 </section>
 
 </main>
