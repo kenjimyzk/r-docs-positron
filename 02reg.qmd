@@ -265,7 +265,7 @@ reg_0 <- lm_robust(lincome ~ yeduc + exper + exper2, data = income6, se_type = "
 summary(reg_0)
 ```
 
-このチャンクでは、`se_type="classical"`で計算したモデル`reg_0`と、頑健標準誤差で計算した`reg_lm`を比較することを意図しています。`summary(reg_0)`を実行すれば、その標準誤差が`lm()`のデフォルト結果と一致し、`summary(reg_lm)`の頑健標準誤差との違いから不均一分散の影響を評価できます。
+このチャンクでは、`se_type="classical"`で計算したモデル`reg_0`（通常の標準誤差）と、頑健標準誤差で計算した`reg_lm`を比較します。`summary(reg_0)`の結果（`lm()`のデフォルトと一致）と`summary(reg_lm)`の結果を比べることで、不均一分散が標準誤差に与える影響を具体的に評価できます。
 
 ### 頑健なモデル間のF検定
 

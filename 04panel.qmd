@@ -118,11 +118,12 @@ $$
 
 ```{r}
 # 1階差分法（fd）による回帰
-preg_fd <- plm(life ~ shock_y2 + income, 
-               data = life9, 
-               effect = "individual", 
-               model = "fd", 
-               index = c("id", "t"))
+preg_fd <- plm(life ~ shock_y2 + income,
+    data = life9,
+    effect = "individual",
+    model = "fd",
+    index = c("id", "t")
+)
 summary(preg_fd)
 ```
 
@@ -137,11 +138,12 @@ summary(preg_fd)
 
 ```{r}
 # 固定効果モデル（within）を用いた回帰
-preg_fe <- plm(life ~ shock + y2 + shock_y2 + income, 
-               data = life9, 
-               effect = "individual", 
-               model = "within", 
-               index = c("id", "t"))
+preg_fe <- plm(life ~ shock + y2 + shock_y2 + income,
+    data = life9,
+    effect = "individual",
+    model = "within",
+    index = c("id", "t")
+)
 summary(preg_fe)
 ```
 
@@ -157,11 +159,12 @@ summary(preg_fe)
 
 ```{r}
 # プーリングOLSを用いた回帰
-preg_p <- plm(life ~ shock + y2 + shock_y2 + income, 
-              data = life9, 
-              effect = "individual", 
-              model = "pooling", 
-              index = c("id", "t"))
+preg_p <- plm(life ~ shock + y2 + shock_y2 + income,
+    data = life9,
+    effect = "individual",
+    model = "pooling",
+    index = c("id", "t")
+)
 summary(preg_p)
 ```
 
@@ -190,11 +193,12 @@ pFtest(preg_fe, preg_p)
 
 ```{r}
 # 変量効果モデル（random）を用いた回帰
-preg_re <- plm(life ~ shock + y2 + shock_y2 + income, 
-               data = life9, 
-               effect = "individual", 
-               model = "random", 
-               index = c("id", "t"))
+preg_re <- plm(life ~ shock + y2 + shock_y2 + income,
+    data = life9,
+    effect = "individual",
+    model = "random",
+    index = c("id", "t")
+)
 summary(preg_re)
 ```
 
@@ -203,15 +207,14 @@ summary(preg_re)
 両モデルとも個人固有効果 $\alpha_i$ を確率変数として扱いますが、説明変数との相関についての仮定が異なります。
 
 | 特徴 | 固定効果モデル | 変量効果モデル |
-|------|----------------|----------------|
-| 個人効果 $\alpha_i$ | 確率変数 | 確率変数 |
-| $\alpha_i$ と説明変数の相関 | 相関があってもよい | 無相関を仮定 |
+|------|----------------|----------------|￥
+| $\alpha_i$ と誤差項の相関 | 相関があってもよい | 無相関を仮定 |
 | 推定方法 | Within変換（個人平均からの偏差） | GLS（一般化最小二乗法） |
 | 効率性 | 低い | 高い（仮定が正しければ） |
 | 一致性 | 常に一致推定量 | 無相関の仮定が満たされれば一致 |
 | 時間不変変数 | 推定不可（Within変換で消える） | 推定可能 |
 
-**ポイント**：固定効果モデルは「個人効果と説明変数が相関している」という現実的な状況でも一致推定量を与えるため、因果推論ではより頑健です。一方、変量効果モデルは無相関の仮定が正しければより効率的（標準誤差が小さい）な推定が可能です。
+**ポイント**：固定効果モデルは「個人効果と説明変数が相関している」という現実的な状況でも一致推定量を与えるため、因果推論ではより頑健です。一方、変量効果モデルは無相関の仮定が正しければより効率的（標準誤差が小さい）な推定が可能です。過去には固定効果を未知の定数、変量効果を確率変数とみなしたが、現在はどちらも確率変数とかんげて、違いは誤差項と相関があるかどうかの仮定が異なるだけです。
 
 ### Hausman検定：固定効果 vs 変量効果
 
