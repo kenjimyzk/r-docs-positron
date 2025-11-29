@@ -346,7 +346,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="ロバスト標準誤差" class="level3" data-number="3.2">
 <h3 data-number="3.2" class="anchored" data-anchor-id="ロバスト標準誤差"><span class="header-section-number">3.2</span> ロバスト標準誤差</h3>
-<p>回帰分析において、誤差項の分散が均一でない <strong>不均一分散</strong> （heteroskedasticity）が存在する場合、通常の標準誤差は過小評価される傾向があり、統計的推論が誤る可能性があります。このような場合、<code>summary()</code> 関数に <code>vcov</code> オプションを指定し、<code>vcovHC()</code> 関数（<code>sandwich</code> パッケージ由来）を用いて <strong>ロバスト標準誤差</strong> （robust standard errors）を計算することで、不均一分散に頼健な標準誤差を得ることができます。</p>
+<p>回帰分析において、誤差項の分散が均一でない <strong>不均一分散</strong> （heteroskedasticity）が存在する場合、通常の標準誤差は過小評価される傾向があり、統計的推論が誤る可能性があります。このような場合、<code>summary()</code> 関数に <code>vcov</code> オプションを指定し、<code>vcovHC()</code> 関数（<code>sandwich</code> パッケージ由来）を用いて <strong>ロバスト標準誤差</strong> （robust standard errors）を計算することで、不均一分散に頑健な標準誤差を得ることができます。</p>
 <p><code>type = "HC1"</code> は、<strong>ホワイトの不均一分散一致推定量（Heteroskedasticity-Consistent Estimator）</strong> の一種です。HC0, HC1, HC2, HC3など複数のタイプがありますが、HC1はStataのデフォルトなどでも使われ、小規模サンプルでのバイアスを誤差項の自由度で調整する方法です。HC2やHC3はさらに改善された方法で、一般的に推奨されることが多いです。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 分散共分散行列を計算</span></span>
@@ -376,12 +376,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>ロバスト標準誤差を用いた場合でも、<code>yeduc</code> の係数は有意（p &lt; 0.01）であり、教育の効果が統計的に確からしいことが支持されます。通常の標準誤差と比較して、標準誤差の値がどのように変化しているかを確認することも重要です（ここでは大きな変化は見られません）。</p>
 <p>なお、<code>vcovHC()</code> 関数を用いて分散共分散行列を計算する際に、<code>type</code> オプションを指定することで、異なる種類のロバスト標準誤差を計算することができます。例えば、<code>type = "HC2"</code> は、HC1よりも一般的な推奨値として使用される種類のロバスト標準誤差を計算します。</p>
-<p>なお、<code>diagnostics = TRUE</code> を同時に指定することで、診断統計量を含めて確認できますが、その場合、通常の標準誤差の結果となることに注意されたい。</p>
+<p>なお、<code>diagnostics = TRUE</code> を同時に指定することで、診断統計量を含めて確認できますが、その場合、通常の標準誤差の結果となることに注意が必要です。</p>
 </section>
 </section>
 <section id="estimatrパッケージ" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="estimatrパッケージ"><span class="header-section-number">4</span> estimatrパッケージ</h2>
-<p><code>estimatr</code>パッケージは、<code>ivreg</code>関数を用いて操作変数法を実行する際に、より簡単に診断統計量を確認することができます。</p>
+<p><code>estimatr</code>パッケージは、<code>ivreg</code>関数を用いて操作変数法を実行する際に、より簡単にロバスト標準誤差を計算し、ロバスト標準誤差にもとづく診断統計量を確認することができます。</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(estimatr)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>ivreg3 <span class="ot">&lt;-</span> <span class="fu">iv_robust</span>(</span>
@@ -456,7 +456,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
 <span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>この結果は、<code>ivreg</code> 関数で <code>diagnostics = TRUE</code> を指定した場合（ロバスト標準誤差を使わない場合）の結果と一致します。<code>se_type = "classical"</code> では、通常の最小二乗法（OLS）の標準誤差が計算され、誤差項が独立で均一分散であるという厳密な仮定の下での推論となります。一方、<code>se_type = "HC1"</code> や <code>"stata"</code> を使用すると、不均一分散に対して頺健な推論が可能になります。</p>
+<p>この結果は、<code>ivreg</code> 関数で <code>diagnostics = TRUE</code> を指定した場合（ロバスト標準誤差を使わない場合）の結果と一致します。<code>se_type = "classical"</code> では、通常の最小二乗法（OLS）の標準誤差が計算され、誤差項が独立で均一分散であるという厳密な仮定の下での推論となります。一方、<code>se_type = "HC1"</code> や <code>"stata"</code> を使用すると、不均一分散に対して頑健な推論が可能になります。</p>
 </section>
 
 </main>
