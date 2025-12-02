@@ -280,7 +280,7 @@ table65 <- modelsummary(
   stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
   gof_omit = "IC|Log|AIC|BIC|RMSE|Within|Pseudo|Std.Errors",
   coef_omit = "\\(Intercept\\)",
-  output= "markdown",
+  output= "table65.png",
   coef_map = c(
     "cap.rate" = "保育所定員率",
     "age" = "母親平均年齢",
@@ -292,9 +292,11 @@ table65 <- modelsummary(
 )
 ```
 
-```{r, collapse=FALSE, output='asis'}
-table65
+
+```{r}
+knitr::include_graphics("table65.png")
 ```
+
 ## 簡単な解釈
 
 ### 分析結果のまとめ
