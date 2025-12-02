@@ -76,7 +76,7 @@ Rで操作変数法を行うには、`AER` パッケージの `ivreg()` 関数�
 ```{r}
 library(AER)
 # 操作変数法による推定
-# 式の書き方: 従属変数 ~ 内生変数 + 外生変数 | 操作変数 + 外生変数
+# 式の書き方: 被説明変数 ~ 内生変数 + 外生変数 | 操作変数 + 外生変数
 ivreg1 <- ivreg(lincome ~ yeduc + exper + exper2 |
     exper + exper2 + payeduc, data = income8)
 summary(ivreg1)
