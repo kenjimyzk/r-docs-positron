@@ -442,8 +442,47 @@ life_{it} = \alpha + \beta \cdot shock_i + \gamma \cdot y2_t + \delta \cdot (sho
 </div>
 <p><strong>固定効果 vs 変量効果の違い</strong>：</p>
 <p>両モデルとも個人固有効果 <span class="math inline">\(\alpha_i\)</span> を確率変数として扱いますが、説明変数との相関についての仮定が異なります。</p>
-<div class="line-block">特徴 | 固定効果モデル | 変量効果モデル |</div>
-<p>|——|—————-|—————-|￥ | <span class="math inline">\(\alpha_i\)</span> と誤差項の相関 | 相関があってもよい | 無相関を仮定 | | 推定方法 | Within変換（個人平均からの偏差） | GLS（一般化最小二乗法） | | 効率性 | 低い | 高い（仮定が正しければ） | | 一致性 | 常に一致推定量 | 無相関の仮定が満たされれば一致 | | 時間不変変数 | 推定不可（Within変換で消える） | 推定可能 |</p>
+<table class="table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 42%">
+<col style="width: 42%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>特徴</th>
+<th>固定効果モデル</th>
+<th>変量効果モデル</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\alpha_i\)</span> と誤差項の相関</td>
+<td>相関があってもよい</td>
+<td>無相関を仮定</td>
+</tr>
+<tr class="even">
+<td>推定方法</td>
+<td>Within変換（個人平均からの偏差）</td>
+<td>GLS（一般化最小二乗法）</td>
+</tr>
+<tr class="odd">
+<td>効率性</td>
+<td>低い</td>
+<td>高い（仮定が正しければ）</td>
+</tr>
+<tr class="even">
+<td>一致性</td>
+<td>常に一致推定量</td>
+<td>無相関の仮定が満たされれば一致</td>
+</tr>
+<tr class="odd">
+<td>時間不変変数</td>
+<td>推定不可（Within変換で消える）</td>
+<td>推定可能</td>
+</tr>
+</tbody>
+</table>
 <p><strong>ポイント</strong>：固定効果モデルは「個人効果と説明変数が相関している」という現実的な状況でも一致推定量を与えるため、因果推論ではより頑健です。一方、変量効果モデルは無相関の仮定が正しければより効率的（標準誤差が小さい）な推定が可能です。過去には固定効果を未知の定数、変量効果を確率変数とみなしたが、現在はどちらも確率変数とかんげて、違いは誤差項と相関があるかどうかの仮定が異なるだけです。</p>
 </section>
 <section id="hausman検定固定効果-vs-変量効果" class="level3" data-number="3.7">

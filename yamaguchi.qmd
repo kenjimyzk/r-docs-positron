@@ -1,5 +1,4 @@
 ---
-title: "R使い方入門：パネルデータ分析とクラスターロバスト標準偏差つき固定効果モデルの実践"
 format: 
     html:
       toc: true
@@ -18,7 +17,7 @@ knitr:
     comment: "#>"
     collapse: true
 ---
-
+# R使い方入門：パネルデータ分析とクラスターロバスト標準偏差つき固定効果モデルの実践
 
 ## データの読み込みと整形
 
@@ -210,14 +209,20 @@ library(modelsummary)
 library(tidyverse)
 library(kableExtra)
 vars <- yamaguchi %>%
-  select(emp.rate, cap.rate, age, age.hus, emp.rate.hus, urate)
+  select(emp.rate, cap.rate, age, age.hus, emp.rate.hus, urate) %>%
+  rename(
+    "母親就業率" = emp.rate,
+    "保育所定員率" = cap.rate,
+    "母親平均年齢" = age,
+    "父親平均年齢" = age.hus,
+    "父親就業率" = emp.rate.hus,
+    "失業率" = urate
+  )
 
 table63 <- datasummary(
   All(vars) ~ N + Mean + SD + Min + Max,
   data = yamaguchi,
-  output = "data.frame",
-  fmt = 3
-)
+  fmt = 3)
 ## 表出力（フォーマット別に処理）
 table63
 ```
@@ -225,12 +230,12 @@ table63
 日本語を反映させると以下になる。
 
 ```{r}
-library(gt)
-colnames(table63) <- c("変数", "サンプルサイズ", "平均", "標準偏差", "最小値", "最大値")
-# 変数名
-table63[,1] <- c("母親就業率", "保育所定員率", "母親平均年齢", "父親平均年齢", "父親就業率", "失業率")
-# 表を出力
-gt(table63)
+# library(gt)
+# colnames(table63) <- c("変数", "サンプルサイズ", "平均", "標準偏差", "最小値", "最大値")
+# # 変数名
+# table63[,1] <- c("母親就業率", "保育所定員率", "母親平均年齢", "父親平均年齢", "父親就業率", "失業率")
+# # 表を出力
+# gt(table63)
 ```
 
 ### 年別記述統計（主要変数）
@@ -243,16 +248,14 @@ gt(table63)
 この時系列的な共変動が、単純OLSで強い正の相関が見られる一因と考えられます。
 
 ```{r}
-table64 <- datasummary(emp.rate * (Mean + SD) + cap.rate * (Mean + SD) ~ factor(year),
-            data = yamaguchi,
-            output = "data.frame",
-            fmt = 3)
-table64            
+table64 <- datasummary(emp.rate * (Mean + SD) + cap.rate * (Mean + SD) ~ factor(year),data = yamaguchi,output = "data.frame",fmt = 3)
+table64
 ```
 
 日本語を反映させると以下になる。
 
 ```{r}
+library(gt)
 # 列名
 colnames(table64) <- c(" ", "変数", "2000", "2005", "2010") # tibbleの都合上1列目は空白1文字とする
 # 変数名
@@ -267,13 +270,8 @@ gt(table64)
 下の表は6つのモデルを横に並べて比較したものです。`coef_omit` により定数項（Intercept）は表示していません。
 
 ```{r}
-models <- list()
-models[["(1)"]] <- fm1
-models[["(2)"]] <- fm2
-models[["(3)"]] <- fm3
-models[["(4)"]] <- fm4
-models[["(5)"]] <- fm5
-models[["(6)"]] <- fm6
+models <- list("(1)" <- fm1,"(2)" <- fm2,"(3)" <- fm3,
+               "(4)" <- fm4,"(5)" <- fm5,"(6)" <- fm6)
 
 table65 <- modelsummary(
   models,
@@ -321,3 +319,14 @@ knitr::include_graphics("table65.png")
 4. **政策的含意**：この分析結果だけでは「保育所を増やしても女性の就業率は上がらない」とは結論づけられません。二元固定効果モデルは非常に厳しい条件での推定であり、効果がゼロというよりも「このデータ・手法では検出できなかった」という解釈が適切です。
 
 (注) 出力の形式や不要な係数をさらに除外したい場合は、`modelsummary()` の `coef_map` や `coef_omit` に正規表現を渡して調整してください。
+
+## レポート作成ワークフロー
+R Markdown と Quarto を使うことで、データ分析からレポート作成までのワークフローを効率化できます。以下は基本的な手順です。
+
+1. **データの読み込みと前処理**：CSVやExcelファイルからデータを読み込み、必要な変数の選択やフィルタリングを行います。
+2. **分析コードの記述**：Rコードチャンク内でデータ分析を実行します。ライブラリ`estimatr` を使用し、回帰分析、可視化、統計検定などを行います。
+3. **結果の出力**：`modelsummary` を使って、分析結果表を出力します。
+4. **レポートの執筆**：Markdown形式で文章を書き、コードチャンクと結果を組み合わせてレポートを作成します。
+5. **ドキュメントのレンダリング**：QuartoやR Markdownを使って、HTML、PDF、Wordなどの形式でレポートを出力します。
+
+
