@@ -259,8 +259,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p><strong>結果の解釈</strong>：年固定効果のみを入れた場合、cap.rate の係数は約 <strong>0.585</strong> で有意です。全国共通の時間トレンド（景気変動など）を除去しても正の関係が残っています。</p>
 </section>
-<section id="モデル4-都道府県-年-の二元固定効果two-way-fe" class="level3" data-number="1.2.6">
-<h3 data-number="1.2.6" class="anchored" data-anchor-id="モデル4-都道府県-年-の二元固定効果two-way-fe"><span class="header-section-number">1.2.6</span> モデル4: 都道府県 + 年 の二元固定効果（Two-way FE）</h3>
+<section id="モデル4-都道府県-年-の双方向固定効果two-way-fe" class="level3" data-number="1.2.6">
+<h3 data-number="1.2.6" class="anchored" data-anchor-id="モデル4-都道府県-年-の双方向固定効果two-way-fe"><span class="header-section-number">1.2.6</span> モデル4: 都道府県 + 年 の双方向固定効果（Two-way FE）</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル4: 都道府県 + 年 の固定効果</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fm4 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
@@ -324,8 +324,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p><strong>結果の解釈</strong>：年固定効果に加えて、妻の年齢（age）、夫の年齢（age.hus）、夫の雇用率（emp.rate.hus）、失業率（urate）を制御変数として追加しました。cap.rate の係数は約 <strong>0.535</strong> で依然として有意です。制御変数を加えてもなお正の効果が確認されます。</p>
 </section>
-<section id="モデル6-制御変数を追加二元固定効果" class="level3" data-number="1.2.8">
-<h3 data-number="1.2.8" class="anchored" data-anchor-id="モデル6-制御変数を追加二元固定効果"><span class="header-section-number">1.2.8</span> モデル6: 制御変数を追加（二元固定効果）</h3>
+<section id="モデル6-制御変数を追加双方向固定効果" class="level3" data-number="1.2.8">
+<h3 data-number="1.2.8" class="anchored" data-anchor-id="モデル6-制御変数を追加双方向固定効果"><span class="header-section-number">1.2.8</span> モデル6: 制御変数を追加（双方向固定効果）</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># モデル6: 制御変数を追加（都道府県+年 固定効果）</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>fm6 <span class="ot">&lt;-</span> <span class="fu">lm_robust</span>(</span>
@@ -356,7 +356,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared (proj. model):  0.2848 ,  Adjusted R-squared (proj. model):  -0.1508 </span></span>
 <span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic (proj. model): 2.468 on 5 and 46 DF,  p-value: 0.04618</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p><strong>結果の解釈</strong>：二元固定効果に制御変数を加えたモデルでは、cap.rate の係数は約 <strong>0.114</strong> で、やはり<strong>有意ではありません</strong>（p値 = 0.126）。一方、失業率（urate）は係数 <strong>-0.661</strong> で5%水準で有意です。これは「失業率が高い地域・時期ほど女性の雇用率が低い」という直感に合った結果です。</p>
+<p><strong>結果の解釈</strong>：双方向固定効果に制御変数を加えたモデルでは、cap.rate の係数は約 <strong>0.114</strong> で、やはり<strong>有意ではありません</strong>（p値 = 0.126）。一方、失業率（urate）は係数 <strong>-0.661</strong> で5%水準で有意です。これは「失業率が高い地域・時期ほど女性の雇用率が低い」という直感に合った結果です。</p>
 </section>
 </section>
 <section id="modelsummary-パッケージのインストールと読み込み" class="level2" data-number="1.3">
@@ -407,8 +407,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
     <script>
 
-      function styleCell_5vrl2641sis6jyo91qil(i, j, css_id) {
-          var table = document.getElementById("tinytable_5vrl2641sis6jyo91qil");
+      function styleCell_wiorimfpz33zhw0977cs(i, j, css_id) {
+          var table = document.getElementById("tinytable_wiorimfpz33zhw0977cs");
           var cell = table.rows[i]?.cells[j];  // Safe navigation to avoid errors
           if (cell) {
               console.log(`Styling cell at (${i}, ${j}) with class ${css_id}`);
@@ -418,7 +418,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           }
       }
       function insertSpanRow(i, colspan, content) {
-        var table = document.getElementById('tinytable_5vrl2641sis6jyo91qil');
+        var table = document.getElementById('tinytable_wiorimfpz33zhw0977cs');
         var newRow = table.insertRow(i);
         var newCell = newRow.insertCell(0);
         newCell.setAttribute("colspan", colspan);
@@ -426,8 +426,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         // this may be unsafe, but innerText does not interpret <br>
         newCell.innerHTML = content;
       }
-      function spanCell_5vrl2641sis6jyo91qil(i, j, rowspan, colspan) {
-        var table = document.getElementById("tinytable_5vrl2641sis6jyo91qil");
+      function spanCell_wiorimfpz33zhw0977cs(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_wiorimfpz33zhw0977cs");
         const targetRow = table.rows[i];
         const targetCell = targetRow.cells[j];
         for (let r = 0; r < rowspan; r++) {
@@ -457,18 +457,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       window.addEventListener('load', function () {
           var cellsToStyle = [
             // tinytable style arrays after
-          { positions: [ { i: 0, j: 1 }, { i: 0, j: 3 }, { i: 0, j: 5 }, { i: 0, j: 2 }, { i: 0, j: 4 },  ], css_id: 'tinytable_css_tpga1flk8rlcw7cc7zhv',}, 
-          { positions: [ { i: 6, j: 0 },  ], css_id: 'tinytable_css_lq85851culk4x90klglf',}, 
-          { positions: [ { i: 1, j: 0 }, { i: 2, j: 0 }, { i: 3, j: 0 }, { i: 4, j: 0 }, { i: 5, j: 0 },  ], css_id: 'tinytable_css_gghb1lo0zzv5wk8edlps',}, 
-          { positions: [ { i: 0, j: 0 },  ], css_id: 'tinytable_css_g4nt1qk47a1rwwzwqh0n',}, 
-          { positions: [ { i: 6, j: 2 }, { i: 6, j: 4 }, { i: 6, j: 1 }, { i: 6, j: 3 }, { i: 6, j: 5 },  ], css_id: 'tinytable_css_8omkqcg5nordkg4m02fq',}, 
-          { positions: [ { i: 5, j: 1 }, { i: 5, j: 3 }, { i: 3, j: 1 }, { i: 4, j: 1 }, { i: 2, j: 2 }, { i: 3, j: 2 }, { i: 4, j: 2 }, { i: 5, j: 2 }, { i: 5, j: 4 }, { i: 1, j: 1 }, { i: 2, j: 1 }, { i: 2, j: 3 }, { i: 3, j: 3 }, { i: 4, j: 3 }, { i: 4, j: 5 }, { i: 5, j: 5 }, { i: 1, j: 2 }, { i: 1, j: 4 }, { i: 2, j: 4 }, { i: 3, j: 4 }, { i: 4, j: 4 }, { i: 2, j: 5 }, { i: 3, j: 5 }, { i: 1, j: 3 }, { i: 1, j: 5 },  ], css_id: 'tinytable_css_6bquwvuohlc8aql5mx1m',}, 
+          { positions: [ { i: 1, j: 0 }, { i: 2, j: 0 }, { i: 3, j: 0 }, { i: 4, j: 0 }, { i: 5, j: 0 },  ], css_id: 'tinytable_css_y3y8qh1i2c81sedncsjd',}, 
+          { positions: [ { i: 0, j: 1 }, { i: 0, j: 3 }, { i: 0, j: 5 }, { i: 0, j: 2 }, { i: 0, j: 4 },  ], css_id: 'tinytable_css_lihvxh2qn72sd9kamkwx',}, 
+          { positions: [ { i: 0, j: 0 },  ], css_id: 'tinytable_css_jdgosv4nhaxodefe5olq',}, 
+          { positions: [ { i: 5, j: 1 }, { i: 5, j: 3 }, { i: 3, j: 1 }, { i: 4, j: 1 }, { i: 2, j: 2 }, { i: 3, j: 2 }, { i: 4, j: 2 }, { i: 5, j: 2 }, { i: 5, j: 4 }, { i: 1, j: 1 }, { i: 2, j: 1 }, { i: 2, j: 3 }, { i: 3, j: 3 }, { i: 4, j: 3 }, { i: 4, j: 5 }, { i: 5, j: 5 }, { i: 1, j: 2 }, { i: 1, j: 4 }, { i: 2, j: 4 }, { i: 3, j: 4 }, { i: 4, j: 4 }, { i: 2, j: 5 }, { i: 3, j: 5 }, { i: 1, j: 3 }, { i: 1, j: 5 },  ], css_id: 'tinytable_css_8l7gzipi83tsl1gfwzk4',}, 
+          { positions: [ { i: 6, j: 0 },  ], css_id: 'tinytable_css_3nqih8659wfj51kulivo',}, 
+          { positions: [ { i: 6, j: 2 }, { i: 6, j: 4 }, { i: 6, j: 1 }, { i: 6, j: 3 }, { i: 6, j: 5 },  ], css_id: 'tinytable_css_0xgu7or4kxkfor00y3un',}, 
           ];
 
           // Loop over the arrays to style the cells
           cellsToStyle.forEach(function (group) {
               group.positions.forEach(function (cell) {
-                  styleCell_5vrl2641sis6jyo91qil(cell.i, cell.j, group.css_id);
+                  styleCell_wiorimfpz33zhw0977cs(cell.i, cell.j, group.css_id);
               });
           });
       });
@@ -476,15 +476,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
     <style>
       /* tinytable css entries after */
-      .table td.tinytable_css_tpga1flk8rlcw7cc7zhv, .table th.tinytable_css_tpga1flk8rlcw7cc7zhv { text-align: right; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
-      .table td.tinytable_css_lq85851culk4x90klglf, .table th.tinytable_css_lq85851culk4x90klglf { text-align: left; border-bottom: solid #d3d8dc 0.1em; }
-      .table td.tinytable_css_gghb1lo0zzv5wk8edlps, .table th.tinytable_css_gghb1lo0zzv5wk8edlps { text-align: left; }
-      .table td.tinytable_css_g4nt1qk47a1rwwzwqh0n, .table th.tinytable_css_g4nt1qk47a1rwwzwqh0n { text-align: left; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
-      .table td.tinytable_css_8omkqcg5nordkg4m02fq, .table th.tinytable_css_8omkqcg5nordkg4m02fq { text-align: right; border-bottom: solid #d3d8dc 0.1em; }
-      .table td.tinytable_css_6bquwvuohlc8aql5mx1m, .table th.tinytable_css_6bquwvuohlc8aql5mx1m { text-align: right; }
+      .table td.tinytable_css_y3y8qh1i2c81sedncsjd, .table th.tinytable_css_y3y8qh1i2c81sedncsjd { text-align: left; }
+      .table td.tinytable_css_lihvxh2qn72sd9kamkwx, .table th.tinytable_css_lihvxh2qn72sd9kamkwx { text-align: right; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+      .table td.tinytable_css_jdgosv4nhaxodefe5olq, .table th.tinytable_css_jdgosv4nhaxodefe5olq { text-align: left; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+      .table td.tinytable_css_8l7gzipi83tsl1gfwzk4, .table th.tinytable_css_8l7gzipi83tsl1gfwzk4 { text-align: right; }
+      .table td.tinytable_css_3nqih8659wfj51kulivo, .table th.tinytable_css_3nqih8659wfj51kulivo { text-align: left; border-bottom: solid #d3d8dc 0.1em; }
+      .table td.tinytable_css_0xgu7or4kxkfor00y3un, .table th.tinytable_css_0xgu7or4kxkfor00y3un { text-align: right; border-bottom: solid #d3d8dc 0.1em; }
     </style>
     <div class="container">
-      <table class="table table-borderless" id="tinytable_5vrl2641sis6jyo91qil" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+      <table class="table table-borderless" id="tinytable_wiorimfpz33zhw0977cs" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
         <thead>
         
               <tr>
@@ -592,23 +592,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="fu">gt</span>(table64)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
-<div id="iobjraqecl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#iobjraqecl table {
+<div id="izbzlldldp" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#izbzlldldp table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#iobjraqecl thead, #iobjraqecl tbody, #iobjraqecl tfoot, #iobjraqecl tr, #iobjraqecl td, #iobjraqecl th {
+#izbzlldldp thead, #izbzlldldp tbody, #izbzlldldp tfoot, #izbzlldldp tr, #izbzlldldp td, #izbzlldldp th {
   border-style: none;
 }
 
-#iobjraqecl p {
+#izbzlldldp p {
   margin: 0;
   padding: 0;
 }
 
-#iobjraqecl .gt_table {
+#izbzlldldp .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -634,12 +634,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-left-color: #D3D3D3;
 }
 
-#iobjraqecl .gt_caption {
+#izbzlldldp .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#iobjraqecl .gt_title {
+#izbzlldldp .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -651,7 +651,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-width: 0;
 }
 
-#iobjraqecl .gt_subtitle {
+#izbzlldldp .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -663,7 +663,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-width: 0;
 }
 
-#iobjraqecl .gt_heading {
+#izbzlldldp .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -675,13 +675,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#iobjraqecl .gt_bottom_border {
+#izbzlldldp .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#iobjraqecl .gt_col_headings {
+#izbzlldldp .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -696,7 +696,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#iobjraqecl .gt_col_heading {
+#izbzlldldp .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -716,7 +716,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#iobjraqecl .gt_column_spanner_outer {
+#izbzlldldp .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -728,15 +728,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 4px;
 }
 
-#iobjraqecl .gt_column_spanner_outer:first-child {
+#izbzlldldp .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#iobjraqecl .gt_column_spanner_outer:last-child {
+#izbzlldldp .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#iobjraqecl .gt_column_spanner {
+#izbzlldldp .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -748,11 +748,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   width: 100%;
 }
 
-#iobjraqecl .gt_spanner_row {
+#izbzlldldp .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#iobjraqecl .gt_group_heading {
+#izbzlldldp .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -778,7 +778,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   text-align: left;
 }
 
-#iobjraqecl .gt_empty_group_heading {
+#izbzlldldp .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -793,15 +793,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: middle;
 }
 
-#iobjraqecl .gt_from_md > :first-child {
+#izbzlldldp .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#iobjraqecl .gt_from_md > :last-child {
+#izbzlldldp .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#iobjraqecl .gt_row {
+#izbzlldldp .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -820,7 +820,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#iobjraqecl .gt_stub {
+#izbzlldldp .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -833,7 +833,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#iobjraqecl .gt_stub_row_group {
+#izbzlldldp .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -847,15 +847,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: top;
 }
 
-#iobjraqecl .gt_row_group_first td {
+#izbzlldldp .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#iobjraqecl .gt_row_group_first th {
+#izbzlldldp .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#iobjraqecl .gt_summary_row {
+#izbzlldldp .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -865,16 +865,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#iobjraqecl .gt_first_summary_row {
+#izbzlldldp .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#iobjraqecl .gt_first_summary_row.thick {
+#izbzlldldp .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#iobjraqecl .gt_last_summary_row {
+#izbzlldldp .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -884,7 +884,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#iobjraqecl .gt_grand_summary_row {
+#izbzlldldp .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -894,7 +894,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#iobjraqecl .gt_first_grand_summary_row {
+#izbzlldldp .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -904,7 +904,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-color: #D3D3D3;
 }
 
-#iobjraqecl .gt_last_grand_summary_row_top {
+#izbzlldldp .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -914,11 +914,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#iobjraqecl .gt_striped {
+#izbzlldldp .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#iobjraqecl .gt_table_body {
+#izbzlldldp .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -927,7 +927,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#iobjraqecl .gt_footnotes {
+#izbzlldldp .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -941,7 +941,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#iobjraqecl .gt_footnote {
+#izbzlldldp .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -950,7 +950,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#iobjraqecl .gt_sourcenotes {
+#izbzlldldp .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -964,7 +964,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#iobjraqecl .gt_sourcenote {
+#izbzlldldp .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -972,72 +972,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#iobjraqecl .gt_left {
+#izbzlldldp .gt_left {
   text-align: left;
 }
 
-#iobjraqecl .gt_center {
+#izbzlldldp .gt_center {
   text-align: center;
 }
 
-#iobjraqecl .gt_right {
+#izbzlldldp .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#iobjraqecl .gt_font_normal {
+#izbzlldldp .gt_font_normal {
   font-weight: normal;
 }
 
-#iobjraqecl .gt_font_bold {
+#izbzlldldp .gt_font_bold {
   font-weight: bold;
 }
 
-#iobjraqecl .gt_font_italic {
+#izbzlldldp .gt_font_italic {
   font-style: italic;
 }
 
-#iobjraqecl .gt_super {
+#izbzlldldp .gt_super {
   font-size: 65%;
 }
 
-#iobjraqecl .gt_footnote_marks {
+#izbzlldldp .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#iobjraqecl .gt_asterisk {
+#izbzlldldp .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#iobjraqecl .gt_indent_1 {
+#izbzlldldp .gt_indent_1 {
   text-indent: 5px;
 }
 
-#iobjraqecl .gt_indent_2 {
+#izbzlldldp .gt_indent_2 {
   text-indent: 10px;
 }
 
-#iobjraqecl .gt_indent_3 {
+#izbzlldldp .gt_indent_3 {
   text-indent: 15px;
 }
 
-#iobjraqecl .gt_indent_4 {
+#izbzlldldp .gt_indent_4 {
   text-indent: 20px;
 }
 
-#iobjraqecl .gt_indent_5 {
+#izbzlldldp .gt_indent_5 {
   text-indent: 25px;
 }
 
-#iobjraqecl .katex-display {
+#izbzlldldp .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#iobjraqecl div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#izbzlldldp div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1157,7 +1157,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>年</td>
 </tr>
 <tr class="even">
-<td>(4) 二元FE</td>
+<td>(4) 双方向FE</td>
 <td>0.090</td>
 <td>n.s.</td>
 <td>都道府県+年</td>
@@ -1169,7 +1169,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>年</td>
 </tr>
 <tr class="even">
-<td>(6) 二元FE+制御変数</td>
+<td>(6) 双方向FE+制御変数</td>
 <td>0.114</td>
 <td>n.s.</td>
 <td>都道府県+年</td>
@@ -1180,10 +1180,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="教育的ポイント" class="level3" data-number="1.4.2">
 <h3 data-number="1.4.2" class="anchored" data-anchor-id="教育的ポイント"><span class="header-section-number">1.4.2</span> 教育的ポイント</h3>
 <ol type="1">
-<li><p><strong>固定効果の重要性</strong>：単純なOLSでは強い正の相関（0.615）が見られますが、二元固定効果を入れると効果は消えます（0.090、有意でない）。これは「見かけの相関」と「因果関係」の違いを示す好例です。</p></li>
+<li><p><strong>固定効果の重要性</strong>：単純なOLSでは強い正の相関（0.615）が見られますが、双方向固定効果を入れると効果は消えます（0.090、有意でない）。これは「見かけの相関」と「因果関係」の違いを示す好例です。</p></li>
 <li><p><strong>欠落変数バイアス（Omitted Variable Bias）</strong>：県の特性や時間トレンドをコントロールしないと、推定にバイアスが生じます。例えば、「女性の就業意欲が高い県は保育所も充実している」という場合、保育所の効果を過大評価してしまいます。</p></li>
 <li><p><strong>クラスター標準誤差</strong>：パネルデータでは同一個体（ここでは都道府県）内で誤差が相関している可能性があるため、クラスター頑健標準誤差を使うことが重要です。</p></li>
-<li><p><strong>政策的含意</strong>：この分析結果だけでは「保育所を増やしても女性の就業率は上がらない」とは結論づけられません。二元固定効果モデルは非常に厳しい条件での推定であり、効果がゼロというよりも「このデータ・手法では検出できなかった」という解釈が適切です。</p></li>
+<li><p><strong>政策的含意</strong>：この分析結果だけでは「保育所を増やしても女性の就業率は上がらない」とは結論づけられません。双方向固定効果モデルは非常に厳しい条件での推定であり、効果がゼロというよりも「このデータ・手法では検出できなかった」という解釈が適切です。</p></li>
 </ol>
 <p>(注) 出力の形式や不要な係数をさらに除外したい場合は、<code>modelsummary()</code> の <code>coef_map</code> や <code>coef_omit</code> に正規表現を渡して調整してください。</p>
 </section>
@@ -1193,7 +1193,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>R Markdown と Quarto を使うことで、データ分析からレポート作成までのワークフローを効率化できます。以下は基本的な手順です。</p>
 <ol type="1">
 <li><strong>データの読み込みと前処理</strong>：CSVやExcelファイルからデータを読み込み、必要な変数の選択やフィルタリングを行います。</li>
-<li><strong>分析コードの記述</strong>：Rコードチャンク内でデータ分析を実行します。ライブラリ<code>estimatr</code> を使用し、回帰分析、可視化、統計検定などを行います。</li>
+<li><strong>分析コードの記述</strong>：Rコードチャンク内でデータ分析を実行します。ライブラリ<code>estimatr</code> を使用し、回帰分析を行います。</li>
 <li><strong>結果の出力</strong>：<code>modelsummary</code> を使って、分析結果表を出力します。</li>
 <li><strong>レポートの執筆</strong>：Markdown形式で文章を書き、コードチャンクと結果を組み合わせてレポートを作成します。</li>
 <li><strong>ドキュメントのレンダリング</strong>：QuartoやR Markdownを使って、HTML、PDF、Wordなどの形式でレポートを出力します。</li>
